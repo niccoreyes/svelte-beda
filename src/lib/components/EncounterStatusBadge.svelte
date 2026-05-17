@@ -5,24 +5,34 @@
 
 	let { status }: Props = $props();
 
-	const statusConfig: Record<string, { label: string; bg: string; text: string; border?: string }> = {
-		planned: { label: 'Planned', bg: 'var(--bcp-1)', text: 'var(--bcp-8)' },
-		arrived: { label: 'Arrived', bg: 'var(--wp-1)', text: 'var(--wp-8)' },
-		'in-progress': { label: 'In Progress', bg: 'var(--bcs-1)', text: 'var(--bcs-8)' },
-		finished: { label: 'Finished', bg: 'var(--gray-2)', text: 'var(--gray-9)' },
-		cancelled: { label: 'Cancelled', bg: 'var(--ep-1)', text: 'var(--ep-8)' },
-		completed: { label: 'Completed', bg: 'var(--bcp-1)', text: 'var(--bcp-8)' }
+	const statusClasses: Record<string, string> = {
+		planned: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+		arrived: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+		'in-progress': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+		finished: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+		cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+		'entered-in-error': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+		completed: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
 	};
 
-	const config = $derived(statusConfig[status] || { label: status, bg: 'var(--gray-2)', text: 'var(--gray-9)' });
+	const statusLabels: Record<string, string> = {
+		planned: 'Planned',
+		arrived: 'Arrived',
+		'in-progress': 'In Progress',
+		finished: 'Finished',
+		cancelled: 'Cancelled',
+		'entered-in-error': 'Entered in Error',
+		completed: 'Completed'
+	};
+
+	const classes = $derived(statusClasses[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300');
+	const label = $derived(statusLabels[status] || status);
 </script>
 
 <span
-	class="badge"
-	style:background-color={config.bg}
-	style:color={config.text}
+	class="badge {classes}"
 >
-	{config.label}
+	{label}
 </span>
 
 <style>
