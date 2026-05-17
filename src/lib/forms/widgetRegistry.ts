@@ -14,6 +14,11 @@ import PhoneWidget from './widgets/PhoneWidget.svelte';
 import SliderWidget from './widgets/SliderWidget.svelte';
 import MarkdownWidget from './widgets/MarkdownWidget.svelte';
 import BarcodeWidget from './widgets/BarcodeWidget.svelte';
+import GroupVoiceWidget from './widgets/GroupVoiceWidget.svelte';
+import GroupTabsWidget from './widgets/GroupTabsWidget.svelte';
+import TimeRangePickerWidget from './widgets/TimeRangePickerWidget.svelte';
+import UploadFileControlWidget from './widgets/UploadFileControlWidget.svelte';
+import InlineChoiceWidget from './widgets/InlineChoiceWidget.svelte';
 
 export type WidgetComponent = Component<{
 	item: QuestionnaireItem;
@@ -41,7 +46,12 @@ export const defaultRegistry: WidgetRegistry = {
 	attachment: AttachmentWidget,
 	phone: PhoneWidget,
 	slider: SliderWidget,
-	barcode: BarcodeWidget
+	barcode: BarcodeWidget,
+	'group-voice': GroupVoiceWidget,
+	'group-tabs': GroupTabsWidget as unknown as WidgetComponent,
+	'time-range-picker': TimeRangePickerWidget,
+	'upload-file-control': UploadFileControlWidget,
+	'inline-choice': InlineChoiceWidget
 };
 
 export function getWidget(

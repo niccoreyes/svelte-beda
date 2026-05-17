@@ -5,15 +5,27 @@
 	import { createServiceState } from '$lib/state';
 	import type { MedicationRequest, Bundle, Patient, Medication, Practitioner } from 'fhir/r4b';
 
-	let searchQuery = $state('');
+	let filterValues = $state<Record<string, string>>({
+		patient: '',
+		status: '[]'
+	});
 
 	const prescriptionState = createServiceState<Bundle>(async () => {
-		const params: Record<string, string> = { _sort: '-_lastUpdated,_id', _count: '20' };
-		if (searchQuery) params['subject:Patient.name:contains'] = searchQuery;
+		const params: Record<string, string | string[]> = { _sort: '-_lastUpdated,_id', _count: '20' };
+		if (filterValues.patient) params['subject:Patient.name:contains'] = filterValues.patient;
+		if (filterValues.status && filterValues.status !== '[]') {
+			try {
+				const parsed = JSON.parse(filterValues.status) as string[];
+				if (parsed.length > 0) params.status = parsed;
+			} catch {
+				// ignore invalid status filter
+			}
+		}
 		return getFHIRResources<MedicationRequest>('MedicationRequest', params);
 	});
 
 	$effect(() => {
+		filterValues;
 		prescriptionState.reload();
 	});
 
@@ -47,24 +59,40 @@
 		return ref;
 	}
 
-	function handleSearch(value: string) {
-		searchQuery = value;
+	function handleFilterChange(id: string, value: string) {
+		filterValues = { ...filterValues, [id]: value };
 	}
 
 	function handleClear() {
-		searchQuery = '';
+		filterValues = { patient: '', status: '[]' };
 	}
 </script>
 
 <PageContainer title="Prescriptions" variant="with-table">
-	<div class="mb-4">
+	<div class="mb-4 flex items-center justify-between">
 		<SearchBar
 			filters={[
-				{ id: 'patient', label: 'Patient', type: 'STRING', value: searchQuery }
+				{ id: 'patient', label: 'Patient', type: 'STRING', value: filterValues.patient, placeholder: 'Search patient name...' },
+				{
+					id: 'status',
+					label: 'Status',
+					type: 'SELECTCHOICE',
+					value: filterValues.status,
+					options: [
+						{ value: 'active', label: 'Active' },
+						{ value: 'on-hold', label: 'On Hold' },
+						{ value: 'completed', label: 'Completed' },
+						{ value: 'stopped', label: 'Stopped' },
+						{ value: 'draft', label: 'Draft' }
+					]
+				}
 			]}
-			onFilterChange={(id, value) => handleSearch(value)}
+			onFilterChange={handleFilterChange}
 			onClearFilters={handleClear}
 		/>
+		<a href="/questionnaires/builder" class="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:opacity-90 transition-opacity">
+			+ Add Questionnaire
+		</a>
 	</div>
 
 	{#if prescriptionState.data.status === 'loading'}

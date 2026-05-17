@@ -15,6 +15,8 @@
 		DashboardIcon,
 		MagicSearchIcon
 	} from '$lib/icons/menu';
+	import { getCurrentUser, isAuthenticated, logout } from '$lib/auth';
+	import { Role } from '$lib/auth/permissions';
 
 	interface Props {
 		collapsed?: boolean;
@@ -23,19 +25,28 @@
 
 	let { collapsed = false, onToggle }: Props = $props();
 
-	const menuItems = [
-		{ label: 'Patients', href: '/patients', icon: PatientsIcon },
-		{ label: 'Practitioners', href: '/practitioners', icon: PractitionersIcon },
-		{ label: 'Encounters', href: '/encounters', icon: EncountersIcon },
-		{ label: 'Scheduling', href: '/scheduling', icon: DashboardIcon },
-		{ label: 'Medications', href: '/medications', icon: MedicationsIcon },
-		{ label: 'Prescriptions', href: '/prescriptions', icon: PrescriptionsIcon },
-		{ label: 'Invoices', href: '/invoices', icon: InvoicesIcon },
-		{ label: 'Healthcare Services', href: '/healthcare-services', icon: ServicesIcon },
-		{ label: 'Questionnaires', href: '/questionnaires', icon: QuestionnairesIcon },
-		{ label: 'Forms Library', href: '/forms', icon: QuestionnairesIcon },
-		{ label: 'Magic Search', href: '/magic-search', icon: MagicSearchIcon }
+	const allMenuItems = [
+		{ label: 'Patients', href: '/patients', icon: PatientsIcon, roles: [Role.Patient, Role.Practitioner, Role.Receptionist, Role.Admin] },
+		{ label: 'Practitioners', href: '/practitioners', icon: PractitionersIcon, roles: [Role.Admin] },
+		{ label: 'Encounters', href: '/encounters', icon: EncountersIcon, roles: [Role.Practitioner, Role.Receptionist, Role.Admin] },
+		{ label: 'Scheduling', href: '/scheduling', icon: DashboardIcon, roles: [Role.Practitioner, Role.Receptionist, Role.Admin] },
+		{ label: 'Medications', href: '/medications', icon: MedicationsIcon, roles: [Role.Practitioner, Role.Admin] },
+		{ label: 'Prescriptions', href: '/prescriptions', icon: PrescriptionsIcon, roles: [Role.Practitioner, Role.Admin] },
+		{ label: 'Invoices', href: '/invoices', icon: InvoicesIcon, roles: [Role.Receptionist, Role.Admin] },
+		{ label: 'Healthcare Services', href: '/healthcare-services', icon: ServicesIcon, roles: [Role.Admin] },
+		{ label: 'Questionnaires', href: '/questionnaires', icon: QuestionnairesIcon, roles: [Role.Practitioner, Role.Admin] },
+		{ label: 'Forms Library', href: '/forms', icon: QuestionnairesIcon, roles: [Role.Practitioner, Role.Admin] },
+		{ label: 'Magic Search', href: '/magic-search', icon: MagicSearchIcon, roles: [Role.Practitioner, Role.Admin] }
 	];
+
+	const user = $derived(getCurrentUser());
+	const currentRole = $derived(user?.role as Role | undefined);
+
+	const menuItems = $derived(
+		allMenuItems.filter((item) =>
+			!currentRole || item.roles.includes(currentRole)
+		)
+	);
 
 	const locales = [
 		{ code: 'en', label: 'English' },
@@ -147,6 +158,26 @@
 					{/each}
 				</select>
 			</div>
+		{/if}
+
+		{#if isAuthenticated()}
+			<div class="divider"></div>
+			<button
+				onclick={logout}
+				class="bottom-item"
+				aria-label="Sign out"
+			>
+				<span class="bottom-icon">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+						<polyline points="16 17 21 12 16 7" />
+						<line x1="21" y1="12" x2="9" y2="12" />
+					</svg>
+				</span>
+				{#if !collapsed}
+					<span class="bottom-label">Sign out</span>
+				{/if}
+			</button>
 		{/if}
 
 		{#if onToggle}

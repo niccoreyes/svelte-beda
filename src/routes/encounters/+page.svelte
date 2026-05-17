@@ -1,11 +1,39 @@
 <script lang="ts">
 	import { PageContainer, ResourceTable, SearchBar, Spinner, Empty } from '$lib/components';
-	import { getFHIRResources } from '$lib/fhir';
+	import { getFHIRResources, updateFHIRResource, deleteFHIRResource } from '$lib/fhir';
 	import { getPatientName, formatPeriodDateTime, parseFHIRReference, extractBundleResources } from '$lib/utils';
 	import { createServiceState } from '$lib/state';
+	import VideoCallModal from '$lib/components/VideoCallModal.svelte';
+	import BatchActionToolbar from '$lib/components/table/BatchActionToolbar.svelte';
+	import BatchActionConfirmModal from '$lib/components/table/BatchActionConfirmModal.svelte';
+	import { getCurrentUser } from '$lib/auth/user';
+	import { matchCurrentUserRole, Role } from '$lib/auth/permissions';
 	import type { Encounter, Bundle, Patient, Practitioner, PractitionerRole } from 'fhir/r4b';
 
 	let searchQuery = $state('');
+	let videoCallOpen = $state(false);
+	let selectedEncounterId = $state<string | null>(null);
+	let selectedIds = $state<string[]>([]);
+	let confirmDeleteOpen = $state(false);
+	let confirmFinishOpen = $state(false);
+
+	const user = getCurrentUser();
+	const userRole = user?.role as Role | undefined;
+	const roomName = $derived(selectedEncounterId ? `beda-encounter-${selectedEncounterId}` : '');
+
+	const canFinish = $derived(matchCurrentUserRole(userRole, Role.Practitioner, Role.Admin));
+	const canDelete = $derived(matchCurrentUserRole(userRole, Role.Admin));
+	const canExport = $derived(true);
+
+	function openVideoCall(encounterId: string) {
+		selectedEncounterId = encounterId;
+		videoCallOpen = true;
+	}
+
+	function closeVideoCall() {
+		videoCallOpen = false;
+		selectedEncounterId = null;
+	}
 
 	const encounterState = createServiceState<Bundle>(async () => {
 		const params: Record<string, string | string[]> = {
@@ -101,6 +129,96 @@
 		}
 	];
 
+	function getRowId(row: unknown): string {
+		return (row as { encounter: Encounter }).encounter.id || '';
+	}
+
+	function handleToggleSelect(id: string) {
+		if (selectedIds.includes(id)) {
+			selectedIds = selectedIds.filter((sid) => sid !== id);
+		} else {
+			selectedIds = [...selectedIds, id];
+		}
+	}
+
+	function handleSelectAll() {
+		const rows = getCurrentRows();
+		const ids = rows.map(getRowId).filter(Boolean);
+		selectedIds = [...new Set([...selectedIds, ...ids])];
+	}
+
+	function handleSelectNone() {
+		const rows = getCurrentRows();
+		const ids = rows.map(getRowId).filter(Boolean);
+		selectedIds = selectedIds.filter((sid) => !ids.includes(sid));
+	}
+
+	function getCurrentRows(): unknown[] {
+		if (encounterState.data.status !== 'success') return [];
+		const bundle = encounterState.data.data;
+		const encounters = bundle.entry?.map((e) => e.resource as Encounter).filter((r): r is Encounter => !!r) || [];
+		return encounters.map((encounter) => ({ encounter, bundle }));
+	}
+
+	function handleFinish() {
+		confirmFinishOpen = true;
+	}
+
+	async function confirmFinish() {
+		confirmFinishOpen = false;
+		const rows = getCurrentRows() as { encounter: Encounter }[];
+		const selected = rows.filter((r) => selectedIds.includes(r.encounter.id || ''));
+		for (const { encounter } of selected) {
+			if (encounter.id) {
+				await updateFHIRResource({ ...encounter, status: 'finished' });
+			}
+		}
+		selectedIds = [];
+		encounterState.reload();
+	}
+
+	function handleDelete() {
+		confirmDeleteOpen = true;
+	}
+
+	async function confirmDelete() {
+		confirmDeleteOpen = false;
+		const rows = getCurrentRows() as { encounter: Encounter }[];
+		const selected = rows.filter((r) => selectedIds.includes(r.encounter.id || ''));
+		for (const { encounter } of selected) {
+			if (encounter.id) {
+				await deleteFHIRResource(encounter);
+			}
+		}
+		selectedIds = [];
+		encounterState.reload();
+	}
+
+	function handleExport() {
+		const rows = getCurrentRows() as { encounter: Encounter; bundle: Bundle }[];
+		const selected = rows.filter((r) => selectedIds.includes(r.encounter.id || ''));
+		if (selected.length === 0) return;
+
+		const headers = ['Patient', 'Practitioner', 'Status', 'Date'];
+		const csvRows = selected.map(({ encounter, bundle }) => [
+			getEncounterPatientName(encounter, bundle),
+			getEncounterPractitionerName(encounter, bundle),
+			encounter.status || '',
+			formatPeriod(encounter.period)
+		]);
+		const csvContent = [headers, ...csvRows]
+			.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+			.join('\n');
+		const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = 'encounters.csv';
+		link.click();
+		URL.revokeObjectURL(url);
+		selectedIds = [];
+	}
+
 	function handleSearch(value: string) {
 		searchQuery = value;
 	}
@@ -111,6 +229,17 @@
 </script>
 
 <PageContainer title="Encounters" variant="with-table">
+	{#snippet titleRightElement()}
+		<button
+			onclick={() => openVideoCall('general')}
+			class="inline-flex items-center gap-1.5 rounded-md bg-[var(--theme-primary)] px-3 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+		>
+			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+			</svg>
+			Start Video Call
+		</button>
+	{/snippet}
 	<div class="mb-4">
 		<SearchBar
 			filters={[
@@ -120,6 +249,16 @@
 			onClearFilters={handleClear}
 		/>
 	</div>
+
+	<BatchActionToolbar
+		count={selectedIds.length}
+		onFinish={canFinish ? handleFinish : undefined}
+		onDelete={canDelete ? handleDelete : undefined}
+		onExport={canExport ? handleExport : undefined}
+		{canFinish}
+		{canDelete}
+		{canExport}
+	/>
 
 	{#if encounterState.data.status === 'loading'}
 		<Spinner />
@@ -132,9 +271,43 @@
 		{@const encounters = bundle.entry?.map((e) => e.resource as Encounter).filter((r): r is Encounter => !!r) || []}
 		{#if encounters.length > 0}
 			{@const rows = encounters.map((encounter) => ({ encounter, bundle }))}
-			<ResourceTable data={rows} {columns} pageSize={10} />
+			<ResourceTable
+				data={rows}
+				{columns}
+				pageSize={10}
+				{getRowId}
+				selectedIds={selectedIds}
+				onToggleSelect={handleToggleSelect}
+				onSelectAll={handleSelectAll}
+				onSelectNone={handleSelectNone}
+			/>
 		{:else}
 			<Empty message="No encounters found" />
 		{/if}
 	{/if}
 </PageContainer>
+
+<VideoCallModal
+	open={videoCallOpen}
+	{roomName}
+	userName={user?.name || 'Clinician'}
+	onClose={closeVideoCall}
+/>
+
+<BatchActionConfirmModal
+	open={confirmDeleteOpen}
+	title="Delete Encounters"
+	message="Are you sure you want to delete {selectedIds.length} selected encounter{selectedIds.length === 1 ? '' : 's'}? This action cannot be undone."
+	confirmLabel="Delete"
+	onConfirm={confirmDelete}
+	onCancel={() => (confirmDeleteOpen = false)}
+/>
+
+<BatchActionConfirmModal
+	open={confirmFinishOpen}
+	title="Finish Encounters"
+	message="Are you sure you want to finish {selectedIds.length} selected encounter{selectedIds.length === 1 ? '' : 's'}?"
+	confirmLabel="Finish"
+	onConfirm={confirmFinish}
+	onCancel={() => (confirmFinishOpen = false)}
+/>

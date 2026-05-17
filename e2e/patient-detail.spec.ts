@@ -1,24 +1,43 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Patient Detail Page', () => {
-	test('page loads with patient ID', async ({ page }) => {
-		// This test assumes a patient with id 'patient-1' exists or is mocked
+test.describe('Patient Detail v2', () => {
+	test('patient detail shows all tabs', async ({ page }) => {
 		await page.goto('/patients/patient-1');
 		await expect(page.locator('text=Overview')).toBeVisible();
+		await expect(page.locator('text=Documents')).toBeVisible();
+		await expect(page.locator('text=Orders')).toBeVisible();
+		await expect(page.locator('text=Resources')).toBeVisible();
+		await expect(page.locator('text=Apps')).toBeVisible();
+		await expect(page.locator('text=Wearables')).toBeVisible();
 	});
 
-	test('displays patient tabs', async ({ page }) => {
+	test('documents tab shows document list', async ({ page }) => {
 		await page.goto('/patients/patient-1');
-		await expect(page.locator('text=Overview')).toBeVisible();
-		await expect(page.locator('text=Encounters')).toBeVisible();
+		await page.click('text=Documents');
 		await expect(page.locator('text=Documents')).toBeVisible();
-		await expect(page.locator('text=Forms')).toBeVisible();
+	});
+
+	test('orders tab shows orders', async ({ page }) => {
+		await page.goto('/patients/patient-1');
+		await page.click('text=Orders');
+		await expect(page.locator('text=Orders')).toBeVisible();
+	});
+
+	test('resources tab shows resource browser', async ({ page }) => {
+		await page.goto('/patients/patient-1');
+		await page.click('text=Resources');
 		await expect(page.locator('text=Resources')).toBeVisible();
 	});
 
-	test('can switch to encounters tab', async ({ page }) => {
+	test('apps tab shows SMART apps', async ({ page }) => {
 		await page.goto('/patients/patient-1');
-		await page.click('text=Encounters');
-		await expect(page.locator('text=No encounters found, text=Encounter')).toBeVisible();
+		await page.click('text=Apps');
+		await expect(page.locator('text=SMART Apps')).toBeVisible();
+	});
+
+	test('wearables tab shows wearable data', async ({ page }) => {
+		await page.goto('/patients/patient-1');
+		await page.click('text=Wearables');
+		await expect(page.locator('text=Wearables')).toBeVisible();
 	});
 });

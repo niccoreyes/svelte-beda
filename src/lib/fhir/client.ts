@@ -3,6 +3,12 @@ import type { Bundle, Resource, FhirResource } from 'fhir/r4b';
 
 const FHIR_BASE_URL = config.fhirBaseURL;
 
+function getAuthHeaders(): Record<string, string> {
+	if (typeof window === 'undefined') return {};
+	const token = localStorage.getItem('beda_access_token');
+	return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 async function fhirRequest<T>({
 	url,
 	method = 'GET',
@@ -19,6 +25,7 @@ async function fhirRequest<T>({
 		headers: {
 			'Content-Type': 'application/fhir+json',
 			Accept: 'application/fhir+json',
+			...getAuthHeaders(),
 			...headers
 		},
 		body: body ? JSON.stringify(body) : undefined

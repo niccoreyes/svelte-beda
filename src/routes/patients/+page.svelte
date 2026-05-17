@@ -1,11 +1,23 @@
 <script lang="ts">
-	import { PageContainer, SearchBar, Spinner, Empty } from '$lib/components';
-	import { getFHIRResources } from '$lib/fhir';
+	import { PageContainer, ResourceTable, SearchBar, Spinner, Empty } from '$lib/components';
+	import { getFHIRResources, deleteFHIRResource } from '$lib/fhir';
 	import { getPatientName } from '$lib/utils';
 	import { createServiceState } from '$lib/state';
+	import BatchActionToolbar from '$lib/components/table/BatchActionToolbar.svelte';
+	import BatchActionConfirmModal from '$lib/components/table/BatchActionConfirmModal.svelte';
+	import { getCurrentUser } from '$lib/auth/user';
+	import { matchCurrentUserRole, Role } from '$lib/auth/permissions';
 	import type { Patient, Bundle } from 'fhir/r4b';
 
 	let searchQuery = $state('');
+	let selectedIds = $state<string[]>([]);
+	let confirmDeleteOpen = $state(false);
+
+	const user = getCurrentUser();
+	const userRole = user?.role as Role | undefined;
+
+	const canDelete = $derived(matchCurrentUserRole(userRole, Role.Admin));
+	const canExport = $derived(true);
 
 	const patientState = createServiceState<Bundle>(async () => {
 		const params: Record<string, string> = { _count: '20' };
@@ -17,6 +29,103 @@
 		searchQuery;
 		patientState.reload();
 	});
+
+	function getRowId(row: unknown): string {
+		return (row as Patient).id || '';
+	}
+
+	function handleToggleSelect(id: string) {
+		if (selectedIds.includes(id)) {
+			selectedIds = selectedIds.filter((sid) => sid !== id);
+		} else {
+			selectedIds = [...selectedIds, id];
+		}
+	}
+
+	function handleSelectAll() {
+		const rows = getCurrentRows();
+		const ids = rows.map(getRowId).filter(Boolean);
+		selectedIds = [...new Set([...selectedIds, ...ids])];
+	}
+
+	function handleSelectNone() {
+		const rows = getCurrentRows();
+		const ids = rows.map(getRowId).filter(Boolean);
+		selectedIds = selectedIds.filter((sid) => !ids.includes(sid));
+	}
+
+	function getCurrentRows(): Patient[] {
+		if (patientState.data.status !== 'success') return [];
+		const bundle = patientState.data.data;
+		return bundle.entry?.map((e) => e.resource as Patient).filter((r): r is Patient => !!r) || [];
+	}
+
+	const columns: Array<{ key: string; header: string; cell: (row: unknown) => string }> = [
+		{
+			key: 'name',
+			header: 'Name',
+			cell: (row: unknown) => getPatientName(row as Patient)
+		},
+		{
+			key: 'birthDate',
+			header: 'Birth Date',
+			cell: (row: unknown) => (row as Patient).birthDate || '-'
+		},
+		{
+			key: 'gender',
+			header: 'Gender',
+			cell: (row: unknown) => (row as Patient).gender || '-'
+		},
+		{
+			key: 'actions',
+			header: 'Actions',
+			cell: (row: unknown) => {
+				const id = (row as Patient).id;
+				return id ? `<a href="/patients/${id}" class="text-primary hover:underline">View</a>` : '-';
+			}
+		}
+	];
+
+	function handleDelete() {
+		confirmDeleteOpen = true;
+	}
+
+	async function confirmDelete() {
+		confirmDeleteOpen = false;
+		const rows = getCurrentRows();
+		const selected = rows.filter((r) => selectedIds.includes(r.id || ''));
+		for (const patient of selected) {
+			if (patient.id) {
+				await deleteFHIRResource(patient);
+			}
+		}
+		selectedIds = [];
+		patientState.reload();
+	}
+
+	function handleExport() {
+		const rows = getCurrentRows();
+		const selected = rows.filter((r) => selectedIds.includes(r.id || ''));
+		if (selected.length === 0) return;
+
+		const headers = ['Name', 'Birth Date', 'Gender'];
+		const csvRows = selected.map((patient) => [
+			getPatientName(patient),
+			patient.birthDate || '',
+			patient.gender || ''
+		]);
+		const csvContent = [headers, ...csvRows]
+			.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+			.join('\n');
+		const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = 'patients.csv';
+		link.click();
+		URL.revokeObjectURL(url);
+		selectedIds = [];
+	}
 
 	function handleSearch(value: string) {
 		searchQuery = value;
@@ -38,6 +147,15 @@
 		/>
 	</div>
 
+	<BatchActionToolbar
+		count={selectedIds.length}
+		onDelete={canDelete ? handleDelete : undefined}
+		onExport={canExport ? handleExport : undefined}
+		canFinish={false}
+		{canDelete}
+		{canExport}
+	/>
+
 	{#if patientState.data.status === 'loading'}
 		<Spinner />
 	{:else if patientState.data.status === 'failure'}
@@ -48,42 +166,27 @@
 		{@const bundle = patientState.data.data}
 		{@const patients = bundle.entry?.map((e) => e.resource as Patient).filter((r): r is Patient => !!r) || []}
 		{#if patients.length > 0}
-			<div class="overflow-x-auto">
-				<table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-					<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-						<tr>
-							<th class="px-6 py-3">Name</th>
-							<th class="px-6 py-3">Birth Date</th>
-							<th class="px-6 py-3">Gender</th>
-							<th class="px-6 py-3">Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each patients as patient}
-							<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-								<td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
-									{getPatientName(patient)}
-								</td>
-								<td class="px-6 py-4">
-									{patient.birthDate || '-'}
-								</td>
-								<td class="px-6 py-4">
-									{patient.gender || '-'}
-								</td>
-								<td class="px-6 py-4">
-									{#if patient.id}
-										<a href="/patients/{patient.id}" class="text-primary hover:underline text-sm">View</a>
-									{:else}
-										-
-									{/if}
-								</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
+			<ResourceTable
+				data={patients}
+				{columns}
+				pageSize={10}
+				{getRowId}
+				selectedIds={selectedIds}
+				onToggleSelect={handleToggleSelect}
+				onSelectAll={handleSelectAll}
+				onSelectNone={handleSelectNone}
+			/>
 		{:else}
 			<Empty message="No patients found" />
 		{/if}
 	{/if}
 </PageContainer>
+
+<BatchActionConfirmModal
+	open={confirmDeleteOpen}
+	title="Delete Patients"
+	message="Are you sure you want to delete {selectedIds.length} selected patient{selectedIds.length === 1 ? '' : 's'}? This action cannot be undone."
+	confirmLabel="Delete"
+	onConfirm={confirmDelete}
+	onCancel={() => (confirmDeleteOpen = false)}
+/>

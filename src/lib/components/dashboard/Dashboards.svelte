@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DashboardCard from '../DashboardCard.svelte';
+	import type { DashboardConfig, DashboardWidgetConfig } from '$lib/dashboard/config';
 
 	interface WidgetConfig {
 		title: string;
@@ -10,17 +11,32 @@
 	}
 
 	interface Props {
-		widgets: WidgetConfig[];
+		widgets?: WidgetConfig[];
+		config?: DashboardConfig;
+		widget?: import('svelte').Snippet<[string, string]>;
 	}
 
-	let { widgets }: Props = $props();
+	let { widgets = [], config, widget: widgetSnippet }: Props = $props();
+
+	let effectiveWidgets = $derived(
+		config ? config.widgets.map((w: DashboardWidgetConfig) => ({ title: w.title })) : widgets
+	);
 </script>
 
 <div class="dashboards-grid">
-	{#each widgets as widget}
-		<DashboardCard title={widget.title} icon={widget.icon} extra={widget.extra} table={widget.table}>
-			{@render widget.children?.()}
-		</DashboardCard>
+	{#each effectiveWidgets as widget, i}
+		{#if config && widgetSnippet}
+			{@const cfg = config.widgets[i]}
+			{#if cfg}
+				<DashboardCard title={widget.title}>
+					{@render widgetSnippet(cfg.type, cfg.title)}
+				</DashboardCard>
+			{/if}
+		{:else}
+			<DashboardCard title={widget.title} icon={widgets[i]?.icon} extra={widgets[i]?.extra} table={widgets[i]?.table}>
+				{@render widgets[i]?.children?.()}
+			</DashboardCard>
+		{/if}
 	{/each}
 </div>
 
