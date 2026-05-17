@@ -153,9 +153,9 @@
 				{#each entries as entry, idx}
 					<div class="p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
 						<div class="flex items-center justify-between mb-1">
-							<span class="text-xs font-medium text-gray-500">Version {entries.length - idx}</span>
+							<span class="text-xs font-medium text-[var(--gray-7)]">Version {entries.length - idx}</span>
 							{#if entry.resource?.meta?.versionId}
-								<span class="text-xs text-gray-400">{entry.resource.meta.versionId}</span>
+								<span class="text-xs text-[var(--gray-6)]">{entry.resource.meta.versionId}</span>
 							{/if}
 						</div>
 						<RenderBundleResourceContext {entry} />

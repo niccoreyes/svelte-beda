@@ -73,7 +73,7 @@
 
 		<div class="notifications-list">
 			{#if filtered.length === 0}
-				<Empty message={filter === 'unread' ? 'No unread notifications' : 'No notifications yet'} />
+				<Empty message={filter === 'unread' ? 'No unread notifications' : 'No notifications yet'} illustration="default" />
 			{:else}
 				{#each filtered as notification (notification.id)}
 					<div class="notification-item {typeStyles[notification.type]} {notification.read ? 'read' : ''}">

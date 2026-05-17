@@ -112,9 +112,9 @@
 					cell: (row: unknown) => getAmount(row as Invoice)
 				}
 			]}
-			<ResourceTable data={invoices} {columns} pageSize={10} />
+			<ResourceTable data={invoices} {columns} pageSize={10} loading={invoiceState.isLoading} />
 		{:else}
-			<Empty message="No invoices found" />
+			<Empty message="No invoices found" illustration="document" />
 		{/if}
 	{/if}
 </PageContainer>

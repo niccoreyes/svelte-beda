@@ -179,7 +179,7 @@
 							{/each}
 						</ul>
 					{:else}
-						<Empty message="No data" />
+						<Empty message="No data" illustration="default" />
 					{/if}
 				</div>
 			{/snippet}

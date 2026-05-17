@@ -1,20 +1,28 @@
 <script lang="ts">
 	import { PageContainer, ResourceTable, SearchBar, Spinner, Empty } from '$lib/components';
-	import { getFHIRResources } from '$lib/fhir';
-	import { createServiceState } from '$lib/state';
+import { getFHIRResources } from '$lib/fhir';
+import { createServiceState } from '$lib/state';
+import { serializeFilters } from '$lib/utils/searchParams';
+import HeaderActionButton from '$lib/components/HeaderActionButton.svelte';
+import CreateResourceModal from '$lib/components/CreateResourceModal.svelte';
 	import type { HealthcareService, Bundle } from 'fhir/r4b';
 
-	let searchQuery = $state('');
+	let filters = $state([
+	{ id: 'name', label: 'Name', type: 'STRING' as const, value: '', searchParam: 'name' }
+]);
+let createModalOpen = $state(false);
 
-	const serviceState = createServiceState<Bundle>(async () => {
-		const params: Record<string, string> = { _sort: '-_lastUpdated,_id', _count: '20' };
-		if (searchQuery) params.name = searchQuery;
-		return getFHIRResources<HealthcareService>('HealthcareService', params);
-	});
+const serviceState = createServiceState<Bundle>(async () => {
+	const params: Record<string, string | string[]> = { _sort: '-_lastUpdated,_id', _count: '20' };
+	const serialized = serializeFilters(filters);
+	Object.assign(params, serialized);
+	return getFHIRResources<HealthcareService>('HealthcareService', params);
+});
 
-	$effect(() => {
-		serviceState.reload();
-	});
+$effect(() => {
+	filters;
+	serviceState.reload();
+});
 
 	function getServiceName(hs: HealthcareService): string {
 		return hs.name || 'Unknown';
@@ -47,22 +55,32 @@
 		}
 	];
 
-	function handleSearch(value: string) {
-		searchQuery = value;
-	}
+function handleFilterChange(id: string, value: string) {
+	filters = filters.map(f => f.id === id ? { ...f, value } : f);
+}
 
-	function handleClear() {
-		searchQuery = '';
-	}
+function handleClear() {
+	filters = filters.map(f => ({ ...f, value: '' }));
+}
 </script>
 
 <PageContainer title="Healthcare Services" variant="with-table">
+	{#snippet titleRightElement()}
+		<HeaderActionButton
+			label="Add Healthcare Service"
+			onClick={() => createModalOpen = true}
+		>
+			{#snippet icon()}
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+				</svg>
+			{/snippet}
+		</HeaderActionButton>
+	{/snippet}
 	<div class="mb-4">
 		<SearchBar
-			filters={[
-				{ id: 'name', label: 'Name', type: 'STRING', value: searchQuery }
-			]}
-			onFilterChange={(id, value) => handleSearch(value)}
+			{filters}
+			onFilterChange={handleFilterChange}
 			onClearFilters={handleClear}
 		/>
 	</div>
@@ -83,3 +101,13 @@
 		{/if}
 	{/if}
 </PageContainer>
+
+<CreateResourceModal
+	questionnaireId="healthcare-service-create"
+	open={createModalOpen}
+	onClose={() => createModalOpen = false}
+	onSuccess={() => {
+		createModalOpen = false;
+		serviceState.reload();
+	}}
+/>

@@ -1,29 +1,40 @@
 <script lang="ts">
 	import { PageContainer, ResourceTable, SearchBar, Spinner, Empty } from '$lib/components';
 	import { getFHIRResources, updateFHIRResource, deleteFHIRResource } from '$lib/fhir';
-	import { getPatientName, formatPeriodDateTime, parseFHIRReference, extractBundleResources } from '$lib/utils';
-	import { createServiceState } from '$lib/state';
-	import VideoCallModal from '$lib/components/VideoCallModal.svelte';
+import { getPatientName, formatPeriodDateTime, parseFHIRReference, extractBundleResources } from '$lib/utils';
+import { serializeFilters } from '$lib/utils/searchParams';
+import { createServiceState } from '$lib/state';
+import VideoCallModal from '$lib/components/VideoCallModal.svelte';
+import HeaderActionButton from '$lib/components/HeaderActionButton.svelte';
+import CreateResourceModal from '$lib/components/CreateResourceModal.svelte';
+	import RecordActions from '$lib/components/RecordActions.svelte';
 	import BatchActionToolbar from '$lib/components/table/BatchActionToolbar.svelte';
 	import BatchActionConfirmModal from '$lib/components/table/BatchActionConfirmModal.svelte';
 	import { getCurrentUser } from '$lib/auth/user';
 	import { matchCurrentUserRole, Role } from '$lib/auth/permissions';
+	import { useTableSorter } from '$lib/utils/tableSorter.svelte';
 	import type { Encounter, Bundle, Patient, Practitioner, PractitionerRole } from 'fhir/r4b';
 
-	let searchQuery = $state('');
-	let videoCallOpen = $state(false);
-	let selectedEncounterId = $state<string | null>(null);
-	let selectedIds = $state<string[]>([]);
-	let confirmDeleteOpen = $state(false);
-	let confirmFinishOpen = $state(false);
+let filters = $state([
+	{ id: 'patient', label: 'Patient', type: 'REFERENCE' as const, value: '', resourceType: 'Patient', searchParam: 'subject', placeholder: 'Search patient...' },
+	{ id: 'practitioner', label: 'Practitioner', type: 'STRING' as const, value: '', searchParam: 'participant', placeholder: 'Search practitioner...' },
+	{ id: 'date', label: 'Date', type: 'DATE' as const, value: '', searchParam: 'date' }
+]);
+let videoCallOpen = $state(false);
+let selectedEncounterId = $state<string | null>(null);
+let selectedIds = $state<string[]>([]);
+let confirmDeleteOpen = $state(false);
+let confirmFinishOpen = $state(false);
+let createModalOpen = $state(false);
 
 	const user = getCurrentUser();
 	const userRole = user?.role as Role | undefined;
 	const roomName = $derived(selectedEncounterId ? `beda-encounter-${selectedEncounterId}` : '');
 
-	const canFinish = $derived(matchCurrentUserRole(userRole, Role.Practitioner, Role.Admin));
-	const canDelete = $derived(matchCurrentUserRole(userRole, Role.Admin));
-	const canExport = $derived(true);
+const canFinish = $derived(matchCurrentUserRole(userRole, Role.Practitioner, Role.Admin));
+const canDelete = $derived(matchCurrentUserRole(userRole, Role.Admin));
+const canExport = $derived(true);
+const canCreateEncounter = $derived(matchCurrentUserRole(userRole, Role.Practitioner, Role.Admin));
 
 	function openVideoCall(encounterId: string) {
 		selectedEncounterId = encounterId;
@@ -35,25 +46,43 @@
 		selectedEncounterId = null;
 	}
 
-	const encounterState = createServiceState<Bundle>(async () => {
-		const params: Record<string, string | string[]> = {
-			_sort: '-date,_id',
-			_count: '20',
-			'_include:iterate': [
-				'Encounter:subject',
-				'Encounter:participant:PractitionerRole',
-				'Encounter:participant:Practitioner',
-				'PractitionerRole:practitioner:Practitioner'
-			]
-		};
-		if (searchQuery) params['subject:Patient.name:contains'] = searchQuery;
-		return getFHIRResources<Encounter>('Encounter', params);
+	const { sortKey, sortDirection, sortParam, setSort } = useTableSorter({
+		resourceType: 'Encounter',
+		initialSortKey: 'date',
+		initialSortDirection: 'desc'
 	});
 
-	$effect(() => {
-		searchQuery;
-		encounterState.reload();
-	});
+	let columnFilterValues = $state<Record<string, string>>({});
+
+const encounterState = createServiceState<Bundle>(async () => {
+	const params: Record<string, string | string[]> = {
+		_count: '20',
+		'_include:iterate': [
+			'Encounter:subject',
+			'Encounter:participant:PractitionerRole',
+			'Encounter:participant:Practitioner',
+			'PractitionerRole:practitioner:Practitioner'
+		]
+	};
+	const serialized = serializeFilters(filters);
+	Object.assign(params, serialized);
+	if (columnFilterValues.patient) {
+		params['subject.name'] = columnFilterValues.patient;
+	}
+	if (sortParam) {
+		params._sort = sortParam;
+	} else {
+		params._sort = '-date,_id';
+	}
+	return getFHIRResources<Encounter>('Encounter', params);
+});
+
+$effect(() => {
+	filters;
+	columnFilterValues;
+	sortParam;
+	encounterState.reload();
+});
 
 	function getEncounterData(encounter: Encounter, bundle: Bundle) {
 		const sourceMap = extractBundleResources(bundle);
@@ -100,14 +129,23 @@
 		return formatPeriodDateTime(period);
 	}
 
-	const columns: Array<{ key: string; header: string; cell: (row: unknown) => string }> = [
+	const columns: Array<{
+		key: string;
+		header: string;
+		cell?: (row: unknown) => string;
+		component?: any;
+		componentProps?: (row: unknown) => Record<string, any>;
+		filter?: { type: 'text' | 'select'; options?: Array<{ value: string; label: string }>; placeholder?: string };
+		sortable?: boolean;
+	}> = [
 		{
 			key: 'patient',
 			header: 'Patient',
 			cell: (row: unknown) => {
 				const { encounter, bundle } = row as { encounter: Encounter; bundle: Bundle };
 				return getEncounterPatientName(encounter, bundle);
-			}
+			},
+			filter: { type: 'text', placeholder: 'Filter patient...' }
 		},
 		{
 			key: 'practitioner',
@@ -120,14 +158,44 @@
 		{
 			key: 'status',
 			header: 'Status',
-			cell: (row: unknown) => (row as { encounter: Encounter }).encounter.status || '-'
+			cell: (row: unknown) => (row as { encounter: Encounter }).encounter.status || '-',
+			sortable: true
 		},
 		{
 			key: 'date',
 			header: 'Date',
-			cell: (row: unknown) => formatPeriod((row as { encounter: Encounter }).encounter.period)
+			cell: (row: unknown) => formatPeriod((row as { encounter: Encounter }).encounter.period),
+			filter: { type: 'text', placeholder: 'Filter date...' },
+			sortable: true
+		},
+		{
+			key: 'actions',
+			header: 'Actions',
+			component: RecordActions,
+			componentProps: (row: unknown) => {
+				const { encounter, bundle } = row as { encounter: Encounter; bundle: Bundle };
+				const id = encounter.id;
+				const { patient } = getEncounterData(encounter, bundle);
+				return {
+					actions: [
+						{
+							label: 'Open',
+							href: id && patient?.id ? `/patients/${patient.id}/encounters/${id}` : undefined
+						},
+						{ label: 'Video Call', onClick: id ? () => openVideoCall(id) : undefined }
+					].filter((a) => Boolean(a.href || a.onClick))
+				};
+			}
 		}
 	];
+
+	function handleColumnFilterChange(key: string, value: string) {
+		if (key === 'patient') {
+			columnFilterValues = { ...columnFilterValues, patient: value };
+		} else if (key === 'date') {
+			filters = filters.map((f) => (f.id === 'date' ? { ...f, value } : f));
+		}
+	}
 
 	function getRowId(row: unknown): string {
 		return (row as { encounter: Encounter }).encounter.id || '';
@@ -219,33 +287,44 @@
 		selectedIds = [];
 	}
 
-	function handleSearch(value: string) {
-		searchQuery = value;
-	}
+function handleFilterChange(id: string, value: string) {
+	filters = filters.map(f => f.id === id ? { ...f, value } : f);
+}
 
-	function handleClear() {
-		searchQuery = '';
-	}
+function handleClear() {
+	filters = filters.map(f => ({ ...f, value: '' }));
+}
 </script>
 
 <PageContainer title="Encounters" variant="with-table">
 	{#snippet titleRightElement()}
-		<button
-			onclick={() => openVideoCall('general')}
-			class="inline-flex items-center gap-1.5 rounded-md bg-[var(--theme-primary)] px-3 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+		{#if canCreateEncounter}
+			<HeaderActionButton
+				label="New Encounter"
+				onClick={() => createModalOpen = true}
+			>
+				{#snippet icon()}
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+					</svg>
+				{/snippet}
+			</HeaderActionButton>
+		{/if}
+		<HeaderActionButton
+			label="Start Video Call"
+			onClick={() => openVideoCall('general')}
 		>
-			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-			</svg>
-			Start Video Call
-		</button>
+			{#snippet icon()}
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+				</svg>
+			{/snippet}
+		</HeaderActionButton>
 	{/snippet}
 	<div class="mb-4">
 		<SearchBar
-			filters={[
-				{ id: 'patient', label: 'Patient', type: 'STRING', value: searchQuery }
-			]}
-			onFilterChange={(id, value) => handleSearch(value)}
+			{filters}
+			onFilterChange={handleFilterChange}
 			onClearFilters={handleClear}
 		/>
 	</div>
@@ -280,12 +359,27 @@
 				onToggleSelect={handleToggleSelect}
 				onSelectAll={handleSelectAll}
 				onSelectNone={handleSelectNone}
+				loading={encounterState.isLoading}
+				sortKey={sortKey ?? null}
+				sortDirection={sortDirection}
+				onSort={setSort}
+				onColumnFilterChange={handleColumnFilterChange}
 			/>
 		{:else}
-			<Empty message="No encounters found" />
+			<Empty message="No encounters found" illustration="calendar" />
 		{/if}
 	{/if}
 </PageContainer>
+
+<CreateResourceModal
+	questionnaireId="encounter-create"
+	open={createModalOpen}
+	onClose={() => createModalOpen = false}
+	onSuccess={() => {
+		createModalOpen = false;
+		encounterState.reload();
+	}}
+/>
 
 <VideoCallModal
 	open={videoCallOpen}

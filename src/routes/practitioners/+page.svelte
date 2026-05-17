@@ -2,15 +2,23 @@
 	import { PageContainer, ResourceTable, SearchBar, Spinner, Empty } from '$lib/components';
 	import { getFHIRResources, deleteFHIRResource } from '$lib/fhir';
 	import { createServiceState } from '$lib/state';
+	import { serializeFilters } from '$lib/utils/searchParams';
 	import BatchActionToolbar from '$lib/components/table/BatchActionToolbar.svelte';
+	import HeaderActionButton from '$lib/components/HeaderActionButton.svelte';
+	import CreateResourceModal from '$lib/components/CreateResourceModal.svelte';
+	import RecordActions from '$lib/components/RecordActions.svelte';
 	import BatchActionConfirmModal from '$lib/components/table/BatchActionConfirmModal.svelte';
 	import { getCurrentUser } from '$lib/auth/user';
 	import { matchCurrentUserRole, Role } from '$lib/auth/permissions';
+	import { useTableSorter } from '$lib/utils/tableSorter.svelte';
 	import type { Practitioner, Bundle, PractitionerRole } from 'fhir/r4b';
 
-	let searchQuery = $state('');
-	let selectedIds = $state<string[]>([]);
-	let confirmDeleteOpen = $state(false);
+let filters = $state([
+	{ id: 'name', label: 'Name', type: 'STRING' as const, value: '', searchParam: 'name' }
+]);
+let selectedIds = $state<string[]>([]);
+let confirmDeleteOpen = $state(false);
+let createModalOpen = $state(false);
 
 	const user = getCurrentUser();
 	const userRole = user?.role as Role | undefined;
@@ -18,16 +26,29 @@
 	const canDelete = $derived(matchCurrentUserRole(userRole, Role.Admin));
 	const canExport = $derived(true);
 
-	const practitionerState = createServiceState<Bundle>(async () => {
-		const params: Record<string, string> = { _sort: '-_lastUpdated,_id', _count: '20' };
-		if (searchQuery) params.name = searchQuery;
-		return getFHIRResources<Practitioner>('Practitioner', params);
+	const { sortKey, sortDirection, sortParam, setSort } = useTableSorter({
+		resourceType: 'Practitioner',
+		initialSortKey: '_lastUpdated',
+		initialSortDirection: 'desc'
 	});
 
-	$effect(() => {
-		searchQuery;
-		practitionerState.reload();
-	});
+const practitionerState = createServiceState<Bundle>(async () => {
+	const params: Record<string, string | string[]> = { _count: '20' };
+	const serialized = serializeFilters(filters);
+	Object.assign(params, serialized);
+	if (sortParam) {
+		params._sort = sortParam;
+	} else {
+		params._sort = '-_lastUpdated,_id';
+	}
+	return getFHIRResources<Practitioner>('Practitioner', params);
+});
+
+$effect(() => {
+	filters;
+	sortParam;
+	practitionerState.reload();
+});
 
 	function getPractitionerName(p: Practitioner): string {
 		const name = p.name?.[0];
@@ -74,14 +95,24 @@
 		return practitioners.map((practitioner) => ({ practitioner, bundle }));
 	}
 
-	const columns: Array<{ key: string; header: string; cell: (row: unknown) => string }> = [
+	const columns: Array<{
+		key: string;
+		header: string;
+		cell?: (row: unknown) => string;
+		component?: any;
+		componentProps?: (row: unknown) => Record<string, any>;
+		filter?: { type: 'text' | 'select'; options?: Array<{ value: string; label: string }>; placeholder?: string };
+		sortable?: boolean;
+	}> = [
 		{
 			key: 'name',
 			header: 'Name',
 			cell: (row: unknown) => {
 				const { practitioner } = row as { practitioner: Practitioner };
 				return getPractitionerName(practitioner);
-			}
+			},
+			filter: { type: 'text', placeholder: 'Filter name...' },
+			sortable: true
 		},
 		{
 			key: 'specialty',
@@ -94,12 +125,25 @@
 		{
 			key: 'actions',
 			header: 'Actions',
-			cell: (row: unknown) => {
-				const id = (row as { practitioner: Practitioner }).practitioner.id;
-				return id ? `<a href="/practitioners/${id}" class="text-primary hover:underline">View</a>` : '-';
+			component: RecordActions,
+			componentProps: (row: unknown) => {
+				const { practitioner } = row as { practitioner: Practitioner };
+				const id = practitioner.id;
+				return {
+					actions: [
+						{ label: 'View', href: id ? `/practitioners/${id}` : undefined },
+						{ label: 'Schedule', href: id ? `/practitioners/${id}` : undefined }
+					].filter((a) => Boolean(a.href))
+				};
 			}
 		}
 	];
+
+	function handleColumnFilterChange(key: string, value: string) {
+		if (key === 'name') {
+			filters = filters.map((f) => (f.id === 'name' ? { ...f, value } : f));
+		}
+	}
 
 	function handleDelete() {
 		confirmDeleteOpen = true;
@@ -141,22 +185,32 @@
 		selectedIds = [];
 	}
 
-	function handleSearch(value: string) {
-		searchQuery = value;
-	}
+function handleFilterChange(id: string, value: string) {
+	filters = filters.map(f => f.id === id ? { ...f, value } : f);
+}
 
-	function handleClear() {
-		searchQuery = '';
-	}
+function handleClear() {
+	filters = filters.map(f => ({ ...f, value: '' }));
+}
 </script>
 
 <PageContainer title="Practitioners" variant="with-table">
+	{#snippet titleRightElement()}
+		<HeaderActionButton
+			label="Add Practitioner"
+			onClick={() => createModalOpen = true}
+		>
+			{#snippet icon()}
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+				</svg>
+			{/snippet}
+		</HeaderActionButton>
+	{/snippet}
 	<div class="mb-4">
 		<SearchBar
-			filters={[
-				{ id: 'name', label: 'Name', type: 'STRING', value: searchQuery }
-			]}
-			onFilterChange={(id, value) => handleSearch(value)}
+			{filters}
+			onFilterChange={handleFilterChange}
 			onClearFilters={handleClear}
 		/>
 	</div>
@@ -190,9 +244,14 @@
 				onToggleSelect={handleToggleSelect}
 				onSelectAll={handleSelectAll}
 				onSelectNone={handleSelectNone}
+				loading={practitionerState.isLoading}
+				sortKey={sortKey ?? null}
+				sortDirection={sortDirection}
+				onSort={setSort}
+				onColumnFilterChange={handleColumnFilterChange}
 			/>
 		{:else}
-			<Empty message="No practitioners found" />
+			<Empty message="No practitioners found" illustration="search" />
 		{/if}
 	{/if}
 </PageContainer>
@@ -204,4 +263,14 @@
 	confirmLabel="Delete"
 	onConfirm={confirmDelete}
 	onCancel={() => (confirmDeleteOpen = false)}
+/>
+
+<CreateResourceModal
+	questionnaireId="practitioner-create"
+	open={createModalOpen}
+	onClose={() => createModalOpen = false}
+	onSuccess={() => {
+		createModalOpen = false;
+		practitionerState.reload();
+	}}
 />

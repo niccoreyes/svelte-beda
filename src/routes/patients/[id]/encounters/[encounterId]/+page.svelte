@@ -100,16 +100,16 @@
 					{@const bundle = observationsState.data.data}
 					{@const observations = bundle.entry?.map((e) => e.resource as Observation).filter((r): r is Observation => !!r) || []}
 					{#if observations.length > 0}
-						<div class="relative pl-4 border-l-2 border-gray-200 dark:border-gray-600 space-y-4">
+						<div class="relative pl-4 border-l-2 border-[var(--gray-4)] dark:border-[var(--gray-5)] space-y-4">
 							{#each observations as obs}
 								<div class="relative">
-									<div class="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-primary border-2 border-white dark:border-gray-800"></div>
-									<div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-										<p class="text-sm font-medium">{obs.code?.text || obs.code?.coding?.[0]?.display || 'Observation'}</p>
-										<p class="text-sm text-gray-500 dark:text-gray-400">
+									<div class="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-primary border-2 border-[var(--gray-1)] dark:border-[var(--gray-3)]"></div>
+									<div class="p-3 bg-[var(--gray-3)] dark:bg-[var(--gray-4)] rounded-lg">
+										<p class="text-sm font-medium text-[var(--gray-10)]">{obs.code?.text || obs.code?.coding?.[0]?.display || 'Observation'}</p>
+										<p class="text-sm text-[var(--gray-7)]">
 											{obs.valueQuantity ? `${obs.valueQuantity.value} ${obs.valueQuantity.unit || ''}` : obs.valueString || '-'}
 										</p>
-										<p class="text-xs text-gray-400 mt-1">{obs.effectiveDateTime ? humanDateTime(obs.effectiveDateTime) : '-'}</p>
+										<p class="text-xs text-[var(--gray-6)] mt-1">{obs.effectiveDateTime ? humanDateTime(obs.effectiveDateTime) : '-'}</p>
 									</div>
 								</div>
 							{/each}
@@ -134,9 +134,9 @@
 					{#if docs.length > 0}
 						<div class="space-y-2">
 							{#each docs as doc}
-								<div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-									<p class="font-medium">{doc.type?.text || doc.type?.coding?.[0]?.display || 'Document'}</p>
-									<p class="text-sm text-gray-500">{doc.status} · {doc.date ? humanDateTime(doc.date) : '-'}</p>
+								<div class="p-3 bg-[var(--gray-3)] dark:bg-[var(--gray-4)] rounded-lg">
+									<p class="font-medium text-[var(--gray-10)]">{doc.type?.text || doc.type?.coding?.[0]?.display || 'Document'}</p>
+									<p class="text-sm text-[var(--gray-7)]">{doc.status} · {doc.date ? humanDateTime(doc.date) : '-'}</p>
 								</div>
 							{/each}
 						</div>

@@ -1,33 +1,38 @@
 <script lang="ts">
 	import { PageContainer, ResourceTable, SearchBar, Spinner, Empty } from '$lib/components';
-	import { getFHIRResources } from '$lib/fhir';
-	import { getPatientName, humanDate } from '$lib/utils';
-	import { createServiceState } from '$lib/state';
+import { getFHIRResources } from '$lib/fhir';
+import { getPatientName, humanDate } from '$lib/utils';
+import { serializeFilters } from '$lib/utils/searchParams';
+import { createServiceState } from '$lib/state';
 	import type { MedicationRequest, Bundle, Patient, Medication, Practitioner } from 'fhir/r4b';
 
-	let filterValues = $state<Record<string, string>>({
-		patient: '',
-		status: '[]'
-	});
+let filterValues = $state<Record<string, string>>({
+	patient: '',
+	status: '[]'
+});
 
-	const prescriptionState = createServiceState<Bundle>(async () => {
-		const params: Record<string, string | string[]> = { _sort: '-_lastUpdated,_id', _count: '20' };
-		if (filterValues.patient) params['subject:Patient.name:contains'] = filterValues.patient;
-		if (filterValues.status && filterValues.status !== '[]') {
-			try {
-				const parsed = JSON.parse(filterValues.status) as string[];
-				if (parsed.length > 0) params.status = parsed;
-			} catch {
-				// ignore invalid status filter
-			}
-		}
-		return getFHIRResources<MedicationRequest>('MedicationRequest', params);
-	});
+const filters = $derived([
+	{ id: 'patient', label: 'Patient', type: 'STRING' as const, value: filterValues.patient, placeholder: 'Search patient name...', searchParam: 'subject:Patient.name:contains' },
+	{ id: 'status', label: 'Status', type: 'SELECTCHOICE' as const, value: filterValues.status, searchParam: 'status', options: [
+		{ value: 'active', label: 'Active' },
+		{ value: 'on-hold', label: 'On Hold' },
+		{ value: 'completed', label: 'Completed' },
+		{ value: 'stopped', label: 'Stopped' },
+		{ value: 'draft', label: 'Draft' }
+	]}
+]);
 
-	$effect(() => {
-		filterValues;
-		prescriptionState.reload();
-	});
+const prescriptionState = createServiceState<Bundle>(async () => {
+	const params: Record<string, string | string[]> = { _sort: '-_lastUpdated,_id', _count: '20' };
+	const serialized = serializeFilters(filters);
+	Object.assign(params, serialized);
+	return getFHIRResources<MedicationRequest>('MedicationRequest', params);
+});
+
+$effect(() => {
+	filters;
+	prescriptionState.reload();
+});
 
 	function findPatient(mr: MedicationRequest, bundle: Bundle): Patient | undefined {
 		const patientId = mr.subject?.reference?.split('/')[1];
@@ -71,22 +76,7 @@
 <PageContainer title="Prescriptions" variant="with-table">
 	<div class="mb-4 flex items-center justify-between">
 		<SearchBar
-			filters={[
-				{ id: 'patient', label: 'Patient', type: 'STRING', value: filterValues.patient, placeholder: 'Search patient name...' },
-				{
-					id: 'status',
-					label: 'Status',
-					type: 'SELECTCHOICE',
-					value: filterValues.status,
-					options: [
-						{ value: 'active', label: 'Active' },
-						{ value: 'on-hold', label: 'On Hold' },
-						{ value: 'completed', label: 'Completed' },
-						{ value: 'stopped', label: 'Stopped' },
-						{ value: 'draft', label: 'Draft' }
-					]
-				}
-			]}
+			{filters}
 			onFilterChange={handleFilterChange}
 			onClearFilters={handleClear}
 		/>
@@ -142,9 +132,9 @@
 					}
 				}
 			]}
-			<ResourceTable data={prescriptions} {columns} pageSize={10} />
+			<ResourceTable data={prescriptions} {columns} pageSize={10} loading={prescriptionState.isLoading} />
 		{:else}
-			<Empty message="No prescriptions found" />
+			<Empty message="No prescriptions found" illustration="document" />
 		{/if}
 	{/if}
 </PageContainer>

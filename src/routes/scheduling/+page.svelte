@@ -117,7 +117,7 @@
 	{#if isLoading(appointmentsState.data)}
 		<Spinner />
 	{:else if appointments.length === 0}
-		<Empty message="No appointments found" />
+		<Empty message="No appointments found" illustration="calendar" />
 	{:else if viewMode === 'calendar'}
 		<ScheduleCalendar
 			appointments={appointments}

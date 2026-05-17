@@ -48,8 +48,8 @@
 		{@const forms = bundle.entry?.map((e) => e.resource as Questionnaire).filter((r): r is Questionnaire => !!r) || []}
 		{#if forms.length > 0}
 			<div class="overflow-x-auto">
-				<table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-					<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+				<table class="w-full text-sm text-left text-[var(--gray-7)]">
+					<thead class="text-xs text-[var(--gray-9)] uppercase bg-[var(--gray-3)] dark:bg-[var(--gray-4)] dark:text-[var(--gray-8)]">
 						<tr>
 							<th class="px-6 py-3">Name</th>
 							<th class="px-6 py-3">Status</th>
@@ -58,8 +58,8 @@
 					</thead>
 					<tbody>
 						{#each forms as form}
-							<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-								<td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+							<tr class="bg-[var(--gray-1)] border-b dark:bg-[var(--gray-3)] dark:border-[var(--gray-5)] hover:bg-[var(--gray-3)] dark:hover:bg-[var(--gray-6)] transition-colors">
+								<td class="px-6 py-4 font-medium text-[var(--gray-10)]">
 									{form.title || form.name || form.id || 'Unknown'}
 								</td>
 								<td class="px-6 py-4">
@@ -67,8 +67,8 @@
 								</td>
 								<td class="px-6 py-4">
 									<div class="flex space-x-2">
-										<a href="/questionnaires/{form.id}" class="text-primary hover:underline text-sm">View</a>
-										<a href="/questionnaires/{form.id}/edit" class="text-primary hover:underline text-sm">Edit</a>
+										<a href="/questionnaires/{form.id}" class="text-[var(--theme-primary)] hover:underline text-sm focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none rounded">View</a>
+										<a href="/questionnaires/{form.id}/edit" class="text-[var(--theme-primary)] hover:underline text-sm focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none rounded">Edit</a>
 									</div>
 								</td>
 							</tr>
@@ -77,7 +77,7 @@
 				</table>
 			</div>
 		{:else}
-			<Empty message="No forms found" />
+			<Empty message="No forms found" illustration="document" />
 		{/if}
 	{/if}
 </PageContainer>

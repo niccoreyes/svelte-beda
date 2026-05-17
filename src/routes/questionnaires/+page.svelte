@@ -27,7 +27,18 @@
 </script>
 
 <PageContainer title="Questionnaires" variant="with-table">
-	<div class="mb-4 flex items-center justify-between">
+	{#snippet titleRightElement()}
+		<a
+			href="/questionnaires/builder"
+			class="inline-flex items-center gap-1.5 rounded-md bg-[var(--theme-primary)] px-3 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+		>
+			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+			</svg>
+			<span>Add Questionnaire</span>
+		</a>
+	{/snippet}
+	<div class="mb-4">
 		<SearchBar
 			filters={[
 				{ id: 'name', label: 'Name', type: 'STRING', value: searchQuery }
@@ -35,9 +46,6 @@
 			onFilterChange={(id, value) => handleSearch(value)}
 			onClearFilters={handleClear}
 		/>
-		<a href="/questionnaires/builder" class="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:opacity-90 transition-opacity">
-			+ Add Questionnaire
-		</a>
 	</div>
 
 	{#if questionnaireState.data.status === 'loading'}
@@ -51,8 +59,8 @@
 		{@const questionnaires = bundle.entry?.map((e) => e.resource as Questionnaire).filter((r): r is Questionnaire => !!r) || []}
 		{#if questionnaires.length > 0}
 			<div class="overflow-x-auto">
-				<table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-					<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+				<table class="w-full text-sm text-left text-[var(--gray-7)]">
+					<thead class="text-xs text-[var(--gray-9)] uppercase bg-[var(--gray-3)] dark:bg-[var(--gray-4)] dark:text-[var(--gray-8)]">
 						<tr>
 							<th class="px-6 py-3">Name</th>
 							<th class="px-6 py-3">Status</th>
@@ -61,8 +69,8 @@
 					</thead>
 					<tbody>
 						{#each questionnaires as q}
-							<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-								<td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+							<tr class="bg-[var(--gray-1)] border-b dark:bg-[var(--gray-3)] dark:border-[var(--gray-5)] hover:bg-[var(--gray-3)] dark:hover:bg-[var(--gray-6)] transition-colors">
+								<td class="px-6 py-4 font-medium text-[var(--gray-10)]">
 									{q.title || q.name || q.id || 'Unknown'}
 								</td>
 								<td class="px-6 py-4">
@@ -70,8 +78,8 @@
 								</td>
 								<td class="px-6 py-4">
 									<div class="flex space-x-2">
-										<a href="/questionnaires/{q.id}" class="text-primary hover:underline text-sm">View</a>
-										<a href="/questionnaires/{q.id}/edit" class="text-primary hover:underline text-sm">Edit</a>
+										<a href="/questionnaires/{q.id}" class="text-[var(--theme-primary)] hover:underline text-sm focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none rounded">View</a>
+										<a href="/questionnaires/{q.id}/edit" class="text-[var(--theme-primary)] hover:underline text-sm focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none rounded">Edit</a>
 									</div>
 								</td>
 							</tr>
@@ -80,7 +88,7 @@
 				</table>
 			</div>
 		{:else}
-			<Empty message="No questionnaires found" />
+			<Empty message="No questionnaires found" illustration="document" />
 		{/if}
 	{/if}
 </PageContainer>

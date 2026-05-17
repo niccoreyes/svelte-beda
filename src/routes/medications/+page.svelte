@@ -68,9 +68,9 @@
 		{@const bundle = medicationState.data.data}
 		{@const medications = bundle.entry?.map((e) => e.resource as MedicationKnowledge).filter((r): r is MedicationKnowledge => !!r) || []}
 		{#if medications.length > 0}
-			<ResourceTable data={medications} {columns} pageSize={10} />
+			<ResourceTable data={medications} {columns} pageSize={10} loading={medicationState.isLoading} />
 		{:else}
-			<Empty message="No medications found" />
+			<Empty message="No medications found" illustration="search" />
 		{/if}
 	{/if}
 </PageContainer>
