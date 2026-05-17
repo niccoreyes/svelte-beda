@@ -239,6 +239,54 @@ The app uses `svelte-i18n` with locale files in `src/lib/i18n/locale/`. Supporte
 ### UI Primitives (`src/lib/components/`)
 - LinkToEdit, TextWithMacroFill, Report, TitleDetails, AlertMessage, Breadcrumbs, Wizard, Tabs, SearchableSelect, ConfirmActionButton
 
+## v4 UI/UX Polish Modules
+
+### Header Actions (`src/lib/components/HeaderActionButton.svelte`, `CreateResourceModal.svelte`)
+- Reusable header action buttons with icons in `PageContainer` via `titleRightElement` snippet
+- Questionnaire-driven creation modals for Patient, Practitioner, Encounter, HealthcareService, Questionnaire
+- Role-gated visibility (e.g., "New Encounter" only for Practitioners/Admins)
+
+### Server-Side Sorting (`src/lib/utils/tableSorter.svelte.ts`)
+- `useTableSorter()` utility with FHIR `_sort` parameter generation
+- Default sort: latest first (`_lastUpdated` descending) for Patient, Practitioner, Encounter lists
+- Click column header to toggle sort direction; first click = descending (newest first)
+- Sort indicator icons (↑ ↓) in table headers
+
+### Column Filters (`src/lib/components/table/ColumnFilterDropdown.svelte`)
+- Inline filter dropdowns inside table column headers
+- Support text input and select dropdown filter types
+- Integrated with Patient, Encounter, Practitioner lists
+
+### SearchBar Enhancements (`src/lib/components/SearchBar.svelte`)
+- `searchBehavior`: `'AND'` vs `'OR'` for SPLITSTRING filters
+- `placement`: `'search-bar'` | `'table'` | `['search-bar', 'table']` for filter visibility control
+- `searchParam`: Override the FHIR query parameter key per filter
+
+### System-Aware Dark Mode (`src/lib/theme/systemTheme.ts`, `ThemeProvider.svelte`)
+- Auto-detects `prefers-color-scheme: dark` on mount and switches accordingly
+- Manual override (Light/Dark/Auto) stored in localStorage as `beda_theme_mode`
+- AppSidebar theme toggle shows 3 options with active state highlighting
+
+### Table Loading Overlay (`ResourceTable.svelte`)
+- `loading` prop shows absolute-positioned spinner overlay on table body
+- Headers and pagination remain visible during loading
+- All list pages pass `isLoading` from `createServiceState`
+
+### Empty State Illustrations (`EmptyStateIllustration.svelte`)
+- SVG icons for search, document, patient, calendar empty states
+- Passed to `Empty.svelte` via `illustration` prop
+- All list pages use context-appropriate illustrations
+
+### Mobile Auto Cards (`ResourceTable.svelte`)
+- CSS media query `@media (max-width: 768px)` auto-switches table to card view
+- Manual table/cards toggle buttons removed
+- Touch-friendly card styling with minimum 44px touch targets
+
+### Record Actions (`RecordActions.svelte`)
+- Per-row action links: View, Chart, Forms, Edit (Patients); Open, Video Call (Encounters); View, Schedule (Practitioners)
+- Styled as small text links with primary color, hover underline, focus rings
+- Uses Svelte component slots in ResourceTable cells
+
 ## File Conventions
 
 - Svelte 5 runes mode (no `svelte:options` needed, use `$state`, `$derived`, `$effect`, `$props`).
