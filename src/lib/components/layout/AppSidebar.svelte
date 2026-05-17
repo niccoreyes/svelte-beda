@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { toggleTheme, getInitialTheme, type ThemeMode } from '$lib/theme';
+	import {
+		getThemePreference,
+		setThemePreference,
+		getSystemTheme,
+		type ThemePreference
+	} from '$lib/theme';
 	import { setLocale, getCurrentLocale } from '$lib/i18n';
 	import { browser } from '$app/environment';
 	import {
@@ -55,18 +60,29 @@
 		{ code: 'de', label: 'Deutsch' }
 	];
 
-	let currentTheme = $state<ThemeMode>('light');
+	let currentPreference = $state<ThemePreference>('auto');
+	let resolvedTheme = $state<'light' | 'dark'>('light');
 	let currentLocale = $state('en');
 
 	$effect(() => {
 		if (browser) {
-			currentTheme = getInitialTheme();
+			currentPreference = getThemePreference();
+			resolvedTheme = currentPreference === 'auto' ? getSystemTheme() : currentPreference;
 			currentLocale = getCurrentLocale();
 		}
 	});
 
-	function handleToggleTheme() {
-		currentTheme = toggleTheme();
+	function handleSetTheme(mode: ThemePreference) {
+		setThemePreference(mode);
+		currentPreference = mode;
+		resolvedTheme = mode === 'auto' ? getSystemTheme() : mode;
+	}
+
+	function cycleTheme() {
+		const modes: ThemePreference[] = ['light', 'dark', 'auto'];
+		const idx = modes.indexOf(currentPreference);
+		const next = modes[(idx + 1) % modes.length] as ThemePreference;
+		handleSetTheme(next);
 	}
 
 	function handleSetLocale(locale: string) {
@@ -117,34 +133,77 @@
 	<div class="sidebar-bottom" class:collapsed>
 		<div class="divider"></div>
 
-		<button
-			onclick={handleToggleTheme}
-			class="bottom-item"
-			aria-label="Toggle dark mode"
-		>
-			<span class="bottom-icon">
-				{#if currentTheme === 'dark'}
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<circle cx="12" cy="12" r="5" />
-						<line x1="12" y1="1" x2="12" y2="3" />
-						<line x1="12" y1="21" x2="12" y2="23" />
-						<line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-						<line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-						<line x1="1" y1="12" x2="3" y2="12" />
-						<line x1="21" y1="12" x2="23" y2="12" />
-						<line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-						<line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-					</svg>
-				{:else}
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-					</svg>
-				{/if}
-			</span>
-			{#if !collapsed}
-				<span class="bottom-label">{currentTheme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+		<div class="bottom-item theme-toggle" class:collapsed>
+			{#if collapsed}
+				<button class="bottom-icon" onclick={cycleTheme} aria-label="Cycle theme">
+					{#if resolvedTheme === 'dark'}
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="12" r="5" />
+							<line x1="12" y1="1" x2="12" y2="3" />
+							<line x1="12" y1="21" x2="12" y2="23" />
+							<line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+							<line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+							<line x1="1" y1="12" x2="3" y2="12" />
+							<line x1="21" y1="12" x2="23" y2="12" />
+							<line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+							<line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+						</svg>
+					{:else}
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+						</svg>
+					{/if}
+				</button>
+			{:else}
+				<span class="bottom-icon">
+					{#if resolvedTheme === 'dark'}
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="12" r="5" />
+							<line x1="12" y1="1" x2="12" y2="3" />
+							<line x1="12" y1="21" x2="12" y2="23" />
+							<line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+							<line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+							<line x1="1" y1="12" x2="3" y2="12" />
+							<line x1="21" y1="12" x2="23" y2="12" />
+							<line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+							<line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+						</svg>
+					{:else}
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+						</svg>
+					{/if}
+				</span>
 			{/if}
-		</button>
+			{#if !collapsed}
+				<div class="theme-options">
+					<button
+						class="theme-option"
+						class:active={currentPreference === 'light'}
+						onclick={() => handleSetTheme('light')}
+						aria-label="Light mode"
+					>
+						Light
+					</button>
+					<button
+						class="theme-option"
+						class:active={currentPreference === 'dark'}
+						onclick={() => handleSetTheme('dark')}
+						aria-label="Dark mode"
+					>
+						Dark
+					</button>
+					<button
+						class="theme-option"
+						class:active={currentPreference === 'auto'}
+						onclick={() => handleSetTheme('auto')}
+						aria-label="Auto mode"
+					>
+						Auto
+					</button>
+				</div>
+			{/if}
+		</div>
 
 		{#if !collapsed}
 			<div class="locale-wrapper">
@@ -461,6 +520,69 @@
 
 	.collapse-btn:hover {
 		color: var(--theme-primary);
+	}
+
+	.theme-toggle {
+		flex-wrap: wrap;
+	}
+
+	.theme-toggle.collapsed {
+		justify-content: center;
+		padding: 8px 0;
+	}
+
+	.theme-toggle .bottom-icon {
+		background: transparent;
+		border: none;
+		padding: 0;
+		margin: 0;
+		cursor: default;
+	}
+
+	.theme-toggle.collapsed .bottom-icon {
+		cursor: pointer;
+	}
+
+	.theme-options {
+		display: flex;
+		gap: 4px;
+		flex: 1;
+	}
+
+	.theme-option {
+		flex: 1;
+		padding: 4px 6px;
+		font-size: 11px;
+		font-weight: 500;
+		border-radius: 4px;
+		border: 1px solid var(--gray-4);
+		background: transparent;
+		color: var(--gray-8);
+		cursor: pointer;
+		transition: all 0.2s;
+		font-family: inherit;
+	}
+
+	.theme-option.active {
+		background-color: var(--theme-primary);
+		border-color: var(--theme-primary);
+		color: #fff;
+	}
+
+	.theme-option:hover:not(.active) {
+		border-color: var(--theme-primary);
+		color: var(--theme-primary);
+	}
+
+	:global(.dark) .theme-option {
+		border-color: var(--gray-4);
+		color: var(--gray-8);
+	}
+
+	:global(.dark) .theme-option.active {
+		background-color: var(--theme-primary);
+		border-color: var(--theme-primary);
+		color: #fff;
 	}
 
 	@media screen and (max-width: 767px) {

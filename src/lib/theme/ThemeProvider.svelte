@@ -1,11 +1,19 @@
 <script lang="ts">
-	import { getInitialTheme, setTheme } from '$lib/theme';
+	import { browser } from '$app/environment';
+	import { getThemePreference, applyResolvedTheme, watchSystemTheme } from '$lib/theme';
 
 	let { children } = $props();
 
 	$effect(() => {
-		const theme = getInitialTheme();
-		setTheme(theme);
+		if (!browser) return;
+		const mode = getThemePreference();
+		applyResolvedTheme(mode);
+		const unwatch = watchSystemTheme(() => {
+			if (getThemePreference() === 'auto') {
+				applyResolvedTheme('auto');
+			}
+		});
+		return unwatch;
 	});
 </script>
 

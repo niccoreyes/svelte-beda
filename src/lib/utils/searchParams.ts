@@ -23,14 +23,15 @@ export function serializeFilters(filters: FilterConfig[]): Record<string, string
 	for (const filter of filters) {
 		const serialized = serializeFilterValue(filter);
 		if (serialized !== undefined) {
-			result[filter.id] = serialized;
+			const key = filter.searchParam || filter.id;
+			result[key] = serialized;
 		}
 	}
 	return result;
 }
 
 export function serializeFilterValue(filter: FilterConfig): string | string[] | undefined {
-	const { type, value, resourceType, delimiter } = filter;
+	const { type, value, resourceType, delimiter, searchBehavior } = filter;
 	if (!value || value === '') return undefined;
 
 	switch (type) {
@@ -67,7 +68,11 @@ export function serializeFilterValue(filter: FilterConfig): string | string[] | 
 		}
 		case 'SPLITSTRING': {
 			const parts = value.split(delimiter || ',').map((v) => v.trim()).filter(Boolean);
-			return parts.length > 0 ? parts : undefined;
+			if (parts.length === 0) return undefined;
+			if (searchBehavior === 'OR') {
+				return parts.join(',');
+			}
+			return parts;
 		}
 		default:
 			return value;

@@ -17,6 +17,9 @@
 		placeholder?: string;
 		valueSetUrl?: string;
 		multi?: boolean;
+		searchBehavior?: 'AND' | 'OR';
+		placement?: 'search-bar' | 'table' | ('search-bar' | 'table')[];
+		searchParam?: string;
 	}
 
 	export function serializeFilters(filters: FilterConfig[]): Record<string, string | string[]> {
@@ -24,14 +27,15 @@
 		for (const filter of filters) {
 			const serialized = serializeFilterValue(filter);
 			if (serialized !== undefined) {
-				result[filter.id] = serialized;
+				const key = filter.searchParam || filter.id;
+				result[key] = serialized;
 			}
 		}
 		return result;
 	}
 
 	export function serializeFilterValue(filter: FilterConfig): string | string[] | undefined {
-		const { type, value, resourceType, delimiter } = filter;
+		const { type, value, resourceType, delimiter, searchBehavior } = filter;
 		if (!value || value === '') return undefined;
 
 		switch (type) {
@@ -66,10 +70,14 @@
 					return value ? [value] : undefined;
 				}
 			}
-			case 'SPLITSTRING': {
-				const parts = value.split(delimiter || ',').map((v) => v.trim()).filter(Boolean);
-				return parts.length > 0 ? parts : undefined;
+		case 'SPLITSTRING': {
+			const parts = value.split(delimiter || ',').map((v) => v.trim()).filter(Boolean);
+			if (parts.length === 0) return undefined;
+			if (searchBehavior === 'OR') {
+				return parts.join(',');
 			}
+			return parts;
+		}
 			default:
 				return value;
 		}
@@ -88,6 +96,15 @@
 	}
 
 	let { filters = [], onFilterChange, onClearFilters, compact = false }: Props = $props();
+
+	let visibleFilters = $derived(
+		filters.filter((f) => {
+			if (!f.placement) return true;
+			const placements = Array.isArray(f.placement) ? f.placement : [f.placement];
+			return placements.includes('search-bar');
+		})
+	);
+
 	let isMobile = $state(false);
 	let mobileDrawerOpen = $state(false);
 
@@ -104,7 +121,7 @@
 	let selectChoiceOpen = $state<Record<string, boolean>>({});
 
 	let activeFilterCount = $derived(
-		filters.filter((f) => {
+		visibleFilters.filter((f) => {
 			if (!f.value || f.value === '') return false;
 			if (f.type === 'DATE') {
 				try {
@@ -672,7 +689,7 @@
 
 {#if !isMobile}
 	<div class="flex items-center space-x-2 p-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-		{#each filters as filter}
+		{#each visibleFilters as filter}
 			{@render filterInput(filter)}
 		{/each}
 		{#if filters.length > 0}
@@ -740,7 +757,7 @@
 					</button>
 				</div>
 				<div class="space-y-3">
-					{#each filters as filter}
+					{#each visibleFilters as filter}
 						{@render mobileFilterInput(filter)}
 					{/each}
 				</div>
