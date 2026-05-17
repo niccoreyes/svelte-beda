@@ -1,0 +1,10 @@
+export { default as PatientsIcon } from './PatientsIcon.svelte';
+export { default as EncountersIcon } from './EncountersIcon.svelte';
+export { default as QuestionnairesIcon } from './QuestionnairesIcon.svelte';
+export { default as PractitionersIcon } from './PractitionersIcon.svelte';
+export { default as ServicesIcon } from './ServicesIcon.svelte';
+export { default as InvoicesIcon } from './InvoicesIcon.svelte';
+export { default as MedicationsIcon } from './MedicationsIcon.svelte';
+export { default as PrescriptionsIcon } from './PrescriptionsIcon.svelte';
+export { default as DashboardIcon } from './DashboardIcon.svelte';
+export { default as MagicSearchIcon } from './MagicSearchIcon.svelte';
