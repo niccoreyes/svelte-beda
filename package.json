@@ -30,11 +30,9 @@
 		]
 	},
 	"devDependencies": {
-		"@storybook/addon-essentials": "^8.6.14",
-		"@storybook/addon-interactions": "^8.6.14",
 		"@storybook/addon-svelte-csf": "^5.1.2",
-		"@storybook/svelte": "^8.6.18",
-		"@storybook/sveltekit": "^8.6.18",
+		"@storybook/svelte": "^10.4.0",
+		"@storybook/sveltekit": "^10.4.0",
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/kit": "^2.57.0",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
@@ -52,7 +50,7 @@
 		"playwright": "^1.60.0",
 		"prettier": "^3.8.3",
 		"prettier-plugin-svelte": "^3.5.2",
-		"storybook": "^8.6.18",
+		"storybook": "^10.4.0",
 		"svelte": "^5.55.2",
 		"svelte-check": "^4.4.6",
 		"tailwindcss": "^4.3.0",
@@ -67,7 +65,7 @@
 		"@fullcalendar/interaction": "^6.1.20",
 		"@fullcalendar/timegrid": "^6.1.20",
 		"@sveltejs/adapter-node": "^5.5.4",
-		"@tanstack/svelte-table": "^8.21.3",
+
 		"chart.js": "^4.5.1",
 		"chartjs-adapter-date-fns": "^3.0.0",
 		"date-fns": "^4.1.0",
