@@ -1,0 +1,43 @@
+export {
+	createFHIRResource,
+	getFHIRResource,
+	updateFHIRResource,
+	saveFHIRResource,
+	patchFHIRResource,
+	deleteFHIRResource,
+	forceDeleteFHIRResource,
+	getFHIRResources,
+	getAllFHIRResources,
+	findFHIRResource,
+	applyFHIRService,
+	applyFHIRServices,
+	loadResourceHistory,
+	expandFHIRValueSet,
+	expandExternalTerminology,
+	expandEMRValueSet,
+	generateUploadUrl,
+	uploadFileWithXHR,
+	generateDownloadUrl
+} from './client';
+
+export {
+	remoteCreate,
+	remoteRead,
+	remoteUpdate,
+	remoteSave,
+	remotePatch,
+	remoteDelete,
+	remoteForceDelete,
+	remoteSearch,
+	remoteSearchAll,
+	remoteFind,
+	remoteOperation,
+	remoteBatch,
+	remoteHistory,
+	remoteExpandValueSet,
+	remoteExpandExternal,
+	remoteExpandEMR,
+	remoteGenerateUploadUrl,
+	remoteUploadFile,
+	remoteGenerateDownloadUrl
+} from './remote';
