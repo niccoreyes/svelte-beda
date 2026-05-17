@@ -9,15 +9,65 @@
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:integration": "docker-compose -f docker-compose.test.yml up -d && npx wait-on http://localhost:8081/fhir/metadata --timeout 120000 && vitest run --config vitest.integration.config.ts --tag integration; docker-compose -f docker-compose.test.yml down",
+		"storybook": "storybook dev -p 6006",
+		"build-storybook": "storybook build",
+		"i18n:extract": "node scripts/extract-i18n.js",
+		"i18n:compile": "node scripts/compile-i18n.js",
+		"test:browser": "node scripts/browser-test.js",
+		"test:browser:screenshot": "node scripts/browser-test.js --screenshot",
+		"test:browser:debug": "node scripts/browser-test.js --debug",
+		"browser:debug": "./scripts/browser-debug.sh"
+	},
+	"lint-staged": {
+		"*.{ts,js,svelte}": [
+			"eslint --fix",
+			"prettier --write"
+		]
 	},
 	"devDependencies": {
+		"@storybook/addon-essentials": "^8.6.14",
+		"@storybook/addon-interactions": "^8.6.14",
+		"@storybook/addon-svelte-csf": "^5.1.2",
+		"@storybook/svelte": "^8.6.18",
+		"@storybook/sveltekit": "^8.6.18",
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/kit": "^2.57.0",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
+		"@tailwindcss/vite": "^4.3.0",
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/svelte": "^5.3.1",
+		"@types/fhir": "^0.0.42",
+		"@typescript-eslint/eslint-plugin": "^8.59.3",
+		"@typescript-eslint/parser": "^8.59.3",
+		"eslint": "^10.4.0",
+		"eslint-plugin-svelte": "^3.17.1",
+		"husky": "^9.1.7",
+		"jsdom": "^29.1.1",
+		"lint-staged": "^17.0.5",
+		"playwright": "^1.60.0",
+		"prettier": "^3.8.3",
+		"prettier-plugin-svelte": "^3.5.2",
+		"storybook": "^8.6.18",
 		"svelte": "^5.55.2",
 		"svelte-check": "^4.4.6",
+		"tailwindcss": "^4.3.0",
 		"typescript": "^6.0.2",
-		"vite": "^8.0.7"
+		"vite": "^8.0.7",
+		"vitest": "^4.1.6",
+		"wait-on": "^8.0.1"
+	},
+	"dependencies": {
+		"@sveltejs/adapter-node": "^5.5.4",
+		"@tanstack/svelte-table": "^8.21.3",
+		"chart.js": "^4.5.1",
+		"chartjs-adapter-date-fns": "^3.0.0",
+		"date-fns": "^4.1.0",
+		"fhir": "^4.12.0",
+		"fhirpath": "^4.10.1",
+		"svelte-i18n": "^4.0.1"
 	}
 }
