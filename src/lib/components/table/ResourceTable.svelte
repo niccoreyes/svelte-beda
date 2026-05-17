@@ -1,7 +1,23 @@
 <script lang="ts">
+	import ColumnFilterDropdown from './ColumnFilterDropdown.svelte';
+
+	interface ColumnConfig {
+		key: string;
+		header: string;
+		cell?: (row: unknown) => string;
+		component?: any;
+		componentProps?: (row: unknown) => Record<string, any>;
+		filter?: {
+			type: 'text' | 'select';
+			options?: Array<{ value: string; label: string }>;
+			placeholder?: string;
+		};
+		sortable?: boolean;
+	}
+
 	interface Props {
 		data: unknown[];
-		columns: Array<{ key: string; header: string; cell: (row: unknown) => string }>;
+		columns: ColumnConfig[];
 		pageSize?: number;
 		getRowId?: (row: unknown) => string;
 		selectedIds?: string[];
@@ -9,6 +25,12 @@
 		onSelectAll?: () => void;
 		onSelectNone?: () => void;
 		viewMode?: 'table' | 'cards';
+		bordered?: boolean;
+		loading?: boolean;
+		sortKey?: string | null;
+		sortDirection?: 'asc' | 'desc';
+		onSort?: (key: string) => void;
+		onColumnFilterChange?: (key: string, value: string) => void;
 	}
 
 	let {
@@ -20,33 +42,25 @@
 		onToggleSelect,
 		onSelectAll,
 		onSelectNone,
-		viewMode = 'table'
+		viewMode = 'table',
+		bordered = false,
+		loading = false,
+		sortKey = null,
+		sortDirection = 'asc',
+		onSort,
+		onColumnFilterChange
 	}: Props = $props();
 
 	let currentPage = $state(1);
 	let internalViewMode = $state<'table' | 'cards'>(viewMode);
+	let columnFilterValues = $state<Record<string, string>>({});
 
 	$effect(() => {
 		internalViewMode = viewMode;
 	});
-	let sortKey = $state<string | null>(null);
-	let sortDirection = $state<'asc' | 'desc'>('asc');
-
-	const sortedData = $derived(() => {
-		if (!sortKey) return data;
-		const col = columns.find((c) => c.key === sortKey);
-		if (!col) return data;
-		return [...data].sort((a, b) => {
-			const aVal = col.cell(a);
-			const bVal = col.cell(b);
-			if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-			if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-			return 0;
-		});
-	});
 
 	const totalPages = $derived(Math.ceil(data.length / pageSize));
-	const paginatedData = $derived(sortedData().slice((currentPage - 1) * pageSize, currentPage * pageSize));
+	const paginatedData = $derived(data.slice((currentPage - 1) * pageSize, currentPage * pageSize));
 
 	const allPageSelected = $derived(() => {
 		if (!getRowId || paginatedData.length === 0) return false;
@@ -58,13 +72,9 @@
 		return paginatedData.some((row) => selectedIds.includes(getRowId(row))) && !allPageSelected();
 	});
 
-	function toggleSort(key: string) {
-		if (sortKey === key) {
-			sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-		} else {
-			sortKey = key;
-			sortDirection = 'asc';
-		}
+	function handleColumnFilterChange(key: string, value: string) {
+		columnFilterValues = { ...columnFilterValues, [key]: value };
+		onColumnFilterChange?.(key, value);
 	}
 
 	function handleHeaderCheckboxChange() {
@@ -80,78 +90,81 @@
 	}
 </script>
 
-<div class="flex items-center justify-end mb-2 gap-1">
-	<button
-		type="button"
-		onclick={() => (internalViewMode = 'table')}
-		class="p-1.5 rounded {internalViewMode === 'table' ? 'bg-primary text-white' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'}"
-		aria-label="Table view"
-		title="Table view"
-	>
-		<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18M3 6h18M3 18h18" />
-		</svg>
-	</button>
-	<button
-		type="button"
-		onclick={() => (internalViewMode = 'cards')}
-		class="p-1.5 rounded {internalViewMode === 'cards' ? 'bg-primary text-white' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'}"
-		aria-label="Cards view"
-		title="Cards view"
-	>
-		<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-		</svg>
-	</button>
-</div>
-
-{#if internalViewMode === 'table'}
-<div class="overflow-x-auto">
-	<table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-		<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+<div class="relative">
+	{#if internalViewMode === 'table'}
+<div class="overflow-x-auto {bordered ? 'rounded-lg border border-[var(--gray-4)]' : ''}">
+	<table class="w-full text-sm">
+		<thead class="text-xs uppercase bg-[var(--gray-3)] text-[var(--gray-9)] {bordered ? '' : 'border-b border-[var(--gray-4)]'}">
 			<tr>
 				{#if getRowId}
-					<th class="px-4 py-3 w-10">
+					<th class="px-4 py-3 w-10 {bordered ? 'border border-[var(--gray-4)]' : ''}">
 						<input
 							type="checkbox"
 							checked={allPageSelected()}
 							indeterminate={somePageSelected()}
 							onchange={handleHeaderCheckboxChange}
-							class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"
+							class="w-4 h-4 accent-[var(--theme-primary)] text-primary bg-[var(--gray-2)] border-[var(--gray-5)] rounded focus:ring-[var(--theme-primary)] dark:focus:ring-[var(--theme-primary)] dark:ring-offset-[var(--gray-3)] dark:bg-[var(--gray-3)] dark:border-[var(--gray-5)]"
 						/>
 					</th>
 				{/if}
 				{#each columns as col}
-					<th class="px-6 py-3 cursor-pointer select-none" onclick={() => toggleSort(col.key)}>
-						{col.header}
-						{#if sortKey === col.key}
-							<span class="ml-1">{sortDirection === 'asc' ? '▲' : '▼'}</span>
+					{@const isSortable = onSort && col.sortable !== false}
+					<th
+						class="px-6 py-3 {isSortable ? 'cursor-pointer select-none' : ''} {bordered ? 'border border-[var(--gray-4)]' : ''} {isSortable ? 'focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none' : ''}"
+						onclick={() => isSortable ? onSort(col.key) : undefined}
+						tabindex={isSortable ? 0 : undefined}
+						role={isSortable ? 'button' : undefined}
+						aria-label={isSortable ? `Sort by ${col.header}` : undefined}
+						onkeydown={(e) => {
+							if (isSortable && (e.key === 'Enter' || e.key === ' ')) {
+								e.preventDefault();
+								onSort(col.key);
+							}
+						}}
+					>
+						<div class="flex items-center gap-1">
+							{col.header}
+							{#if sortKey === col.key}
+								<span class="ml-1 text-[var(--theme-primary)]">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+							{/if}
+						</div>
+						{#if col.filter}
+							<ColumnFilterDropdown
+								filter={col.filter}
+								value={columnFilterValues[col.key] ?? ''}
+								onChange={(value) => handleColumnFilterChange(col.key, value)}
+							/>
 						{/if}
 					</th>
 				{/each}
 			</tr>
 		</thead>
-		<tbody>
+		<tbody class="text-[var(--gray-10)]">
 			{#each paginatedData as row}
 				{@const rowId = getRowId ? getRowId(row) : undefined}
 				{@const isSelected = rowId ? selectedIds.includes(rowId) : false}
-				<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+				<tr class="bg-[var(--gray-1)] dark:bg-[var(--gray-3)] {bordered ? '' : 'border-b border-[var(--gray-4)]'} hover:bg-[var(--gray-3)] dark:hover:bg-[var(--gray-6)] transition-colors">
 					{#if getRowId && rowId}
-						<td class="px-4 py-4 w-10">
+						<td class="px-4 py-4 w-10 {bordered ? 'border border-[var(--gray-4)]' : ''}">
 							<input
 								type="checkbox"
 								checked={isSelected}
 								onchange={() => handleRowCheckbox(rowId)}
-								class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"
+								class="w-4 h-4 accent-[var(--theme-primary)] text-primary bg-[var(--gray-2)] border-[var(--gray-5)] rounded focus:ring-[var(--theme-primary)] dark:focus:ring-[var(--theme-primary)] dark:ring-offset-[var(--gray-3)] dark:bg-[var(--gray-3)] dark:border-[var(--gray-5)]"
 							/>
 						</td>
 					{/if}
 					{#each columns as col}
-								<td class="px-6 py-4">
-									{#if col.cell(row).startsWith('<')}
-										{@html col.cell(row)}
+								{@const CellComponent = col.component}
+								<td class="px-6 py-4 {bordered ? 'border border-[var(--gray-4)]' : ''}">
+									{#if CellComponent}
+										<CellComponent {...(col.componentProps?.(row) ?? {})} />
+									{:else if col.cell && col.cell(row).startsWith('<')}
+										<div class="[&_a]:text-[var(--theme-primary)] [&_a]:hover:underline">
+											{@html col.cell(row)}
+										</div>
 									{:else}
-										{col.cell(row)}
+										{col.cell?.(row) ?? ''}
 									{/if}
 								</td>
 					{/each}
@@ -165,25 +178,30 @@
 	{#each paginatedData as row}
 		{@const rowId = getRowId ? getRowId(row) : undefined}
 		{@const isSelected = rowId ? selectedIds.includes(rowId) : false}
-		<div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow">
+		<div class="bg-[var(--gray-1)] dark:bg-[var(--gray-3)] rounded-lg border border-[var(--gray-4)] dark:border-[var(--gray-5)] p-4 hover:shadow-md transition-shadow">
 			<div class="flex items-center justify-between mb-3">
 				{#if getRowId && rowId}
 					<input
 						type="checkbox"
 						checked={isSelected}
 						onchange={() => handleRowCheckbox(rowId)}
-						class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:focus:ring-primary dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"
+						class="w-4 h-4 accent-[var(--theme-primary)] text-primary bg-[var(--gray-2)] border-[var(--gray-5)] rounded focus:ring-[var(--theme-primary)] dark:focus:ring-[var(--theme-primary)] dark:ring-offset-[var(--gray-3)] dark:bg-[var(--gray-3)] dark:border-[var(--gray-5)]"
 					/>
 				{/if}
 			</div>
 			{#each columns as col}
+							{@const CellComponent = col.component}
 							<div class="mb-2 last:mb-0">
-								<div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{col.header}</div>
-								<div class="text-sm text-gray-800 dark:text-gray-200 font-medium">
-									{#if col.cell(row).startsWith('<')}
-										{@html col.cell(row)}
+								<div class="text-xs text-[var(--gray-7)] uppercase tracking-wide">{col.header}</div>
+								<div class="text-sm text-[var(--gray-10)] font-medium">
+									{#if CellComponent}
+										<CellComponent {...(col.componentProps?.(row) ?? {})} />
+									{:else if col.cell && col.cell(row).startsWith('<')}
+										<div class="[&_a]:text-[var(--theme-primary)] [&_a]:hover:underline">
+											{@html col.cell(row)}
+										</div>
 									{:else}
-										{col.cell(row)}
+										{col.cell?.(row) ?? ''}
 									{/if}
 								</div>
 							</div>
@@ -193,22 +211,29 @@
 </div>
 {/if}
 
+{#if loading}
+	<div class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 z-10">
+		<div class="animate-spin h-8 w-8 border-4 border-[var(--theme-primary)] border-t-transparent rounded-full"></div>
+	</div>
+{/if}
+</div>
+
 {#if totalPages > 1}
 	<div class="flex items-center justify-between p-4">
 		<button
 			onclick={() => currentPage = Math.max(1, currentPage - 1)}
 			disabled={currentPage <= 1}
-			class="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 rounded disabled:opacity-50"
+			class="px-3 py-1 text-sm bg-[var(--gray-2)] dark:bg-[var(--gray-3)] text-[var(--gray-10)] border border-[var(--gray-4)] dark:border-[var(--gray-5)] rounded disabled:opacity-50 focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none"
 		>
 			Previous
 		</button>
-		<span class="text-sm text-gray-600 dark:text-gray-400">
+		<span class="text-sm text-[var(--gray-8)]">
 			Page {currentPage} of {totalPages}
 		</span>
 		<button
 			onclick={() => currentPage = Math.min(totalPages, currentPage + 1)}
 			disabled={currentPage >= totalPages}
-			class="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 rounded disabled:opacity-50"
+			class="px-3 py-1 text-sm bg-[var(--gray-2)] dark:bg-[var(--gray-3)] text-[var(--gray-10)] border border-[var(--gray-4)] dark:border-[var(--gray-5)] rounded disabled:opacity-50 focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none"
 		>
 			Next
 		</button>

@@ -3,6 +3,7 @@ import { notAsked, loading, success, failure } from './remoteData';
 
 export interface ServiceState<T> {
 	data: RemoteData<T, Error>;
+	isLoading: boolean;
 	reload: () => Promise<void>;
 	softReload: () => Promise<void>;
 	set: (data: T) => void;
@@ -26,6 +27,9 @@ export function createServiceState<T>(fetcher: () => Promise<T>): ServiceState<T
 	return {
 		get data() {
 			return data;
+		},
+		get isLoading() {
+			return data.status === 'loading';
 		},
 		reload: () => load(false),
 		softReload: () => load(true),
