@@ -13,11 +13,11 @@
 
 	let { questionnaire, patientId, initialResponse, onSaved }: Props = $props();
 
-	const subjectRef = `Patient/${patientId}`;
+	const subjectRef = $derived(`Patient/${patientId}`);
 	const user = getCurrentUser();
-	const authorRef = user?.sub ? `Practitioner/${user.sub}` : undefined;
+	const authorRef = $derived(user?.sub ? `Practitioner/${user.sub}` : undefined);
 
-	const draftKey = `patient-doc-${patientId}-${questionnaire.id}`;
+	const draftKey = $derived(`patient-doc-${patientId}-${questionnaire.id}`);
 
 	function saveDraftLocal(data: Partial<QuestionnaireResponse>) {
 		try {

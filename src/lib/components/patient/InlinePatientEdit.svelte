@@ -14,16 +14,27 @@
 	const originalAddress = $derived(patient.address?.[0] || { line: [''], city: '', state: '', postalCode: '', country: '' });
 	const originalTelecom = $derived(patient.telecom?.[0] || { system: 'phone', value: '' });
 
+	// svelte-ignore state_referenced_locally (form fields initialize from props; component is remounted per patient)
 	let givenName = $state(originalName.given?.[0] || '');
+	// svelte-ignore state_referenced_locally
 	let familyName = $state(originalName.family || '');
+	// svelte-ignore state_referenced_locally
 	let birthDate = $state(patient.birthDate || '');
+	// svelte-ignore state_referenced_locally
 	let gender = $state(patient.gender || '');
+	// svelte-ignore state_referenced_locally
 	let addressLine = $state(originalAddress.line?.[0] || '');
+	// svelte-ignore state_referenced_locally
 	let city = $state(originalAddress.city || '');
+	// svelte-ignore state_referenced_locally
 	let addressState = $state(originalAddress.state || '');
+	// svelte-ignore state_referenced_locally
 	let postalCode = $state(originalAddress.postalCode || '');
+	// svelte-ignore state_referenced_locally
 	let country = $state(originalAddress.country || '');
+	// svelte-ignore state_referenced_locally
 	let telecomSystem = $state(originalTelecom.system || 'phone');
+	// svelte-ignore state_referenced_locally
 	let telecomValue = $state(originalTelecom.value || '');
 	let submitting = $state(false);
 	let errors = $state<Record<string, string>>({});

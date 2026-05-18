@@ -13,6 +13,7 @@
 
 	let { tabs, activeTab, onTabChange, children }: Props = $props();
 
+	// svelte-ignore state_referenced_locally (intentional initial-value-only; component owns its own tab state)
 	let current = $state(activeTab || tabs[0]?.id || '');
 
 	function switchTab(id: string) {

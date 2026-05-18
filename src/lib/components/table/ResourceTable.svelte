@@ -52,12 +52,7 @@
 	}: Props = $props();
 
 	let currentPage = $state(1);
-	let internalViewMode = $state<'table' | 'cards'>(viewMode);
 	let columnFilterValues = $state<Record<string, string>>({});
-
-	$effect(() => {
-		internalViewMode = viewMode;
-	});
 
 	const totalPages = $derived(Math.ceil(data.length / pageSize));
 	const paginatedData = $derived(data.slice((currentPage - 1) * pageSize, currentPage * pageSize));
@@ -91,7 +86,7 @@
 </script>
 
 <div class="relative">
-	{#if internalViewMode === 'table'}
+	{#if viewMode === 'table'}
 <div class="overflow-x-auto {bordered ? 'rounded-lg border border-[var(--gray-4)]' : ''}">
 	<table class="w-full text-sm">
 		<thead class="text-xs uppercase bg-[var(--gray-3)] text-[var(--gray-9)] {bordered ? '' : 'border-b border-[var(--gray-4)]'}">

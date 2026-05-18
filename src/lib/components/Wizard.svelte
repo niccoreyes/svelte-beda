@@ -14,6 +14,7 @@
 
 	let { steps, currentStep = 0, children, onStepChange, onComplete }: Props = $props();
 
+	// svelte-ignore state_referenced_locally (intentional initial-value-only; wizard is self-navigating)
 	let step = $state(currentStep);
 
 	function goNext() {

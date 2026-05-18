@@ -9,6 +9,7 @@
 	}
 
 	let { item, items, renderItem }: Props = $props();
+	// svelte-ignore state_referenced_locally (intentional initial-value-only; component manages its own active tab)
 	let activeTab = $state<string>(items[0]?.linkId || '');
 
 	const tabs = $derived(

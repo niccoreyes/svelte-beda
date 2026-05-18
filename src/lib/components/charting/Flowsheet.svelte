@@ -31,6 +31,7 @@
 	let { patientId, observationTypes = DEFAULT_VITAL_SIGNS }: Props = $props();
 
 	let viewMode = $state<'table' | 'chart'>('table');
+	// svelte-ignore state_referenced_locally (intentional initial-value-only; user-selected chart type)
 	let selectedChartType = $state(observationTypes[0]?.code || '');
 
 	const observationsState = createServiceState<Bundle>(async () => {
