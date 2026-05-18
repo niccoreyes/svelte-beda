@@ -166,8 +166,8 @@
 		valueSetLoading[filterId] = true;
 		try {
 			const result = await expandEMRValueSet(url);
-			const expansion = (result as any)?.expansion?.contains || [];
-			valueSetOptions[filterId] = expansion.map((item: any) => ({
+			const expansion = (result as unknown as { expansion?: { contains?: Array<{ code: string; display?: string }> } })?.expansion?.contains || [];
+			valueSetOptions[filterId] = expansion.map((item: { code: string; display?: string }) => ({
 				value: item.code,
 				label: item.display || item.code
 			}));
@@ -195,9 +195,10 @@
 			}
 			const bundle = await getFHIRResources(resourceType, params);
 			const resources = bundle.entry?.map((e) => e.resource).filter(Boolean) || [];
-			referenceSearchResults[filterId] = resources.map((r: any) => {
-				let label = r.name?.[0] ? formatName(r.name[0]) : (r.name || r.id || r.resourceType);
-				return { value: `${r.resourceType}/${r.id}`, label };
+			referenceSearchResults[filterId] = resources.map((r) => {
+				const res = r as { name?: Array<{ given?: string[]; family?: string; text?: string }>; id?: string; resourceType?: string };
+				let label = res.name?.[0] ? formatName(res.name[0]) : (res.id || res.resourceType || 'Unknown');
+				return { value: `${res.resourceType}/${res.id}`, label };
 			});
 		} catch {
 			referenceSearchResults[filterId] = [];
@@ -338,7 +339,7 @@
 			{/if}
 			{#if referenceSearchOpen[filter.id] && (referenceSearchResults[filter.id] || []).length > 0}
 				<div class="absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-lg max-h-48 overflow-auto top-14">
-					{#each referenceSearchResults[filter.id] || [] as option}
+					{#each referenceSearchResults[filter.id] || [] as option (option.value)}
 						<button
 							type="button"
 							onclick={() => selectReferenceOption(filter.id, option)}
@@ -398,7 +399,7 @@
 				class="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700"
 			>
 				<option value="">-- Select --</option>
-				{#each filter.options || [] as option}
+				{#each filter.options || [] as option (option.value)}
 					<option value={option.value}>{option.label}</option>
 				{/each}
 			</select>
@@ -407,7 +408,7 @@
 		<div class="flex flex-col">
 			<span class="text-xs text-gray-500 dark:text-gray-400 mb-1">{filter.label}</span>
 			<div class="flex flex-wrap gap-2">
-				{#each filter.options || [] as option}
+				{#each filter.options || [] as option (option.value)}
 					<label class="inline-flex items-center space-x-1 text-sm">
 						<input
 							type="radio"
@@ -446,7 +447,7 @@
 					class="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700"
 				>
 					<option value="">-- Select --</option>
-					{#each valueSetOptions[filter.id] || [] as option}
+					{#each valueSetOptions[filter.id] || [] as option (option.value)}
 						<option value={option.value}>{option.label}</option>
 					{/each}
 				</select>
@@ -469,7 +470,7 @@
 			</button>
 			{#if selectChoiceOpen[filter.id]}
 				<div class="absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-lg max-h-48 overflow-auto">
-					{#each filter.options || [] as option}
+					{#each filter.options || [] as option (option.value)}
 						<label class="flex items-center px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer {isSelectChoiceSelected(filter, option.value) ? 'bg-primary/10 text-primary' : 'text-gray-700 dark:text-gray-200'}">
 							<input
 								type="checkbox"
@@ -530,7 +531,7 @@
 			{/if}
 			{#if referenceSearchOpen[filter.id] && (referenceSearchResults[filter.id] || []).length > 0}
 				<div class="z-20 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-auto">
-					{#each referenceSearchResults[filter.id] || [] as option}
+					{#each referenceSearchResults[filter.id] || [] as option (option.value)}
 						<button
 							type="button"
 							onclick={() => selectReferenceOption(filter.id, option)}
@@ -590,7 +591,7 @@
 				class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700"
 			>
 				<option value="">-- Select --</option>
-				{#each filter.options || [] as option}
+				{#each filter.options || [] as option (option.value)}
 					<option value={option.value}>{option.label}</option>
 				{/each}
 			</select>
@@ -599,7 +600,7 @@
 		<div class="flex flex-col">
 			<span class="text-sm text-gray-500 dark:text-gray-400 mb-1">{filter.label}</span>
 			<div class="flex flex-wrap gap-3">
-				{#each filter.options || [] as option}
+				{#each filter.options || [] as option (option.value)}
 					<label class="inline-flex items-center space-x-2 text-sm">
 						<input
 							type="radio"
@@ -638,7 +639,7 @@
 					class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700"
 				>
 					<option value="">-- Select --</option>
-					{#each valueSetOptions[filter.id] || [] as option}
+					{#each valueSetOptions[filter.id] || [] as option (option.value)}
 						<option value={option.value}>{option.label}</option>
 					{/each}
 				</select>
@@ -661,7 +662,7 @@
 			</button>
 			{#if selectChoiceOpen[filter.id]}
 				<div class="z-20 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-auto">
-					{#each filter.options || [] as option}
+					{#each filter.options || [] as option (option.value)}
 						<label class="flex items-center px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer {isSelectChoiceSelected(filter, option.value) ? 'bg-primary/10 text-primary' : 'text-gray-700 dark:text-gray-200'}">
 							<input
 								type="checkbox"
@@ -689,7 +690,7 @@
 
 {#if !isMobile}
 	<div class="flex items-center space-x-2 p-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-		{#each visibleFilters as filter}
+		{#each visibleFilters as filter (filter.id)}
 			{@render filterInput(filter)}
 		{/each}
 		{#if filters.length > 0}
@@ -757,7 +758,7 @@
 					</button>
 				</div>
 				<div class="space-y-3">
-					{#each visibleFilters as filter}
+					{#each visibleFilters as filter (filter.id)}
 						{@render mobileFilterInput(filter)}
 					{/each}
 				</div>

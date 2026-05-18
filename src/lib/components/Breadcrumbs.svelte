@@ -7,10 +7,11 @@
 </script>
 
 <nav class="breadcrumbs" aria-label="Breadcrumb">
-	{#each crumbs as crumb, i}
+	{#each crumbs as crumb, i (crumb.href)}
 		{#if i > 0}
 			<span class="separator">/</span>
 		{/if}
+		<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 		<a href={crumb.href} class="crumb-link" class:last={i === crumbs.length - 1}>
 			{crumb.label}
 		</a>

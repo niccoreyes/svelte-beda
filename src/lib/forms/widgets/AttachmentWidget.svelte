@@ -13,14 +13,10 @@
 
 	let { item, answer, onChange, readonly = false, error }: Props = $props();
 
-	let fileName = $state('');
+	let fileName = $state(answer?.valueAttachment?.title ?? answer?.valueAttachment?.url ?? '');
 	let progress = $state(0);
 	let uploading = $state(false);
 	let uploadStatus = $state<'uploading' | 'complete' | 'error' | undefined>(undefined);
-
-	$effect(() => {
-		fileName = answer?.valueAttachment?.title ?? answer?.valueAttachment?.url ?? '';
-	});
 
 	async function handleFileChange(event: Event) {
 		const target = event.target as HTMLInputElement;

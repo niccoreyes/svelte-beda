@@ -9,6 +9,7 @@ import HeaderActionButton from '$lib/components/HeaderActionButton.svelte';
 import CreateResourceModal from '$lib/components/CreateResourceModal.svelte';
 	import BatchActionConfirmModal from '$lib/components/table/BatchActionConfirmModal.svelte';
 	import RecordActions from '$lib/components/RecordActions.svelte';
+	import type { Component } from 'svelte';
 	import InlinePatientEdit from '$lib/components/patient/InlinePatientEdit.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import { getCurrentUser } from '$lib/auth/user';
@@ -53,11 +54,10 @@ const patientState = createServiceState<Bundle>(async () => {
 	return getFHIRResources<Patient>('Patient', params);
 });
 
-$effect(() => {
-	filters;
-	sortParam;
-	patientState.reload();
-});
+	$effect(() => {
+		[filters, sortParam].forEach(() => {});
+		patientState.reload();
+	});
 
 	function getRowId(row: unknown): string {
 		return (row as Patient).id || '';
@@ -99,6 +99,7 @@ $effect(() => {
 		editModalOpen = false;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	function handleEditSave(saved: Patient) {
 		editPatient = null;
 		editModalOpen = false;
@@ -109,8 +110,9 @@ $effect(() => {
 		key: string;
 		header: string;
 		cell?: (row: unknown) => string;
-		component?: any;
-		componentProps?: (row: unknown) => Record<string, any>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		component?: Component<any, any, any>;
+		componentProps?: (row: unknown) => Record<string, unknown>;
 		filter?: { type: 'text' | 'select'; options?: Array<{ value: string; label: string }>; placeholder?: string };
 		sortable?: boolean;
 	}> = [

@@ -110,14 +110,14 @@
 	<PageContainer title={getPatientName(patient)} variant="with-tabs">
 		{#snippet headerContent()}
 			<div class="flex space-x-1 border-b border-gray-200 dark:border-gray-700">
-				{#each tabs as tab}
-					<button
-						class="px-4 py-2 text-sm font-medium border-b-2 transition-colors {activeTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}"
-						onclick={() => activeTab = tab.id}
-					>
-						{tab.label}
-					</button>
-				{/each}
+			{#each tabs as tab (tab.id)}
+				<button
+					class="px-4 py-2 text-sm font-medium border-b-2 transition-colors {activeTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}"
+					onclick={() => activeTab = tab.id}
+				>
+					{tab.label}
+				</button>
+			{/each}
 			</div>
 		{/snippet}
 

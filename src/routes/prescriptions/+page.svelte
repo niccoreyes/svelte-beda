@@ -3,6 +3,7 @@
 import { getFHIRResources } from '$lib/fhir';
 import { getPatientName, humanDate } from '$lib/utils';
 import { serializeFilters } from '$lib/utils/searchParams';
+	import { resolve } from '$app/paths';
 import { createServiceState } from '$lib/state';
 	import type { MedicationRequest, Bundle, Patient, Medication, Practitioner } from 'fhir/r4b';
 
@@ -29,19 +30,19 @@ const prescriptionState = createServiceState<Bundle>(async () => {
 	return getFHIRResources<MedicationRequest>('MedicationRequest', params);
 });
 
-$effect(() => {
-	filters;
-	prescriptionState.reload();
-});
+	$effect(() => {
+		[filters].forEach(() => {});
+		prescriptionState.reload();
+	});
 
 	function findPatient(mr: MedicationRequest, bundle: Bundle): Patient | undefined {
 		const patientId = mr.subject?.reference?.split('/')[1];
-		return bundle.entry?.find((e) => (e.resource as any)?.resourceType === 'Patient' && (e.resource as Patient).id === patientId)?.resource as Patient | undefined;
+		return bundle.entry?.find((e) => (e.resource as Record<string, unknown>)?.resourceType === 'Patient' && (e.resource as Patient).id === patientId)?.resource as Patient | undefined;
 	}
 
 	function findMedication(mr: MedicationRequest, bundle: Bundle): Medication | undefined {
 		const medId = mr.medicationReference?.reference?.split('/')[1];
-		return bundle.entry?.find((e) => (e.resource as any)?.resourceType === 'Medication' && (e.resource as Medication).id === medId)?.resource as Medication | undefined;
+		return bundle.entry?.find((e) => (e.resource as Record<string, unknown>)?.resourceType === 'Medication' && (e.resource as Medication).id === medId)?.resource as Medication | undefined;
 	}
 
 	function findRequester(mr: MedicationRequest, bundle: Bundle): string {
@@ -49,7 +50,7 @@ $effect(() => {
 		if (!ref) return 'Unknown';
 		const [type, id] = ref.split('/');
 		if (type === 'Practitioner') {
-			const p = bundle.entry?.find((e) => (e.resource as any)?.resourceType === 'Practitioner' && (e.resource as Practitioner).id === id)?.resource as Practitioner | undefined;
+			const p = bundle.entry?.find((e) => (e.resource as Record<string, unknown>)?.resourceType === 'Practitioner' && (e.resource as Practitioner).id === id)?.resource as Practitioner | undefined;
 			const name = p?.name?.[0];
 			if (name) {
 				const given = name.given?.join(' ') || '';
@@ -58,7 +59,7 @@ $effect(() => {
 			}
 		}
 		if (type === 'Organization') {
-			const org = bundle.entry?.find((e) => (e.resource as any)?.resourceType === 'Organization' && (e.resource as { id?: string }).id === id)?.resource as { name?: string } | undefined;
+			const org = bundle.entry?.find((e) => (e.resource as Record<string, unknown>)?.resourceType === 'Organization' && (e.resource as { id?: string }).id === id)?.resource as { name?: string } | undefined;
 			return org?.name || 'Unknown';
 		}
 		return ref;
@@ -80,7 +81,7 @@ $effect(() => {
 			onFilterChange={handleFilterChange}
 			onClearFilters={handleClear}
 		/>
-		<a href="/questionnaires/builder" class="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:opacity-90 transition-opacity">
+		<a href={resolve("/questionnaires/builder")} class="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:opacity-90 transition-opacity">
 			+ Add Questionnaire
 		</a>
 	</div>

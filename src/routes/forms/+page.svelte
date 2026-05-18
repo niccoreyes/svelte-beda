@@ -3,6 +3,7 @@
 	import { getFHIRResources } from '$lib/fhir';
 	import { createServiceState } from '$lib/state';
 	import type { Questionnaire, Bundle } from 'fhir/r4b';
+	import { resolve } from '$app/paths';
 
 	let searchQuery = $state('');
 
@@ -13,7 +14,7 @@
 	});
 
 	$effect(() => {
-		searchQuery;
+		[searchQuery].forEach(() => {});
 		formState.reload();
 	});
 
@@ -57,7 +58,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each forms as form}
+						{#each forms as form (form.id)}
 							<tr class="bg-[var(--gray-1)] border-b dark:bg-[var(--gray-3)] dark:border-[var(--gray-5)] hover:bg-[var(--gray-3)] dark:hover:bg-[var(--gray-6)] transition-colors">
 								<td class="px-6 py-4 font-medium text-[var(--gray-10)]">
 									{form.title || form.name || form.id || 'Unknown'}
@@ -67,8 +68,8 @@
 								</td>
 								<td class="px-6 py-4">
 									<div class="flex space-x-2">
-										<a href="/questionnaires/{form.id}" class="text-[var(--theme-primary)] hover:underline text-sm focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none rounded">View</a>
-										<a href="/questionnaires/{form.id}/edit" class="text-[var(--theme-primary)] hover:underline text-sm focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none rounded">Edit</a>
+										<a href={resolve(`/questionnaires/${form.id}`)} class="text-[var(--theme-primary)] hover:underline text-sm focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none rounded">View</a>
+										<a href={resolve(`/questionnaires/${form.id}/edit`)} class="text-[var(--theme-primary)] hover:underline text-sm focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none rounded">Edit</a>
 									</div>
 								</td>
 							</tr>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { SvelteMap } from 'svelte/reactivity';
 	import type { QuestionnaireItem, QuestionnaireResponseItem, QuestionnaireResponseItemAnswer } from 'fhir/r4b';
 	import QuestionnaireItemComponent from './QuestionnaireItem.svelte';
 	import { evaluateEnableWhen } from './enableWhen';
@@ -19,7 +20,7 @@
 		onChange,
 		readonly = false,
 		validationErrors = [],
-		enabledMap = new Map(),
+		enabledMap = new SvelteMap(),
 		responseItems = []
 	}: Props = $props();
 
@@ -62,13 +63,13 @@
 		</div>
 
 		<div class="flex gap-2 mb-4">
-			{#each children as _, index}
-				<button
-					class="flex-1 h-2 rounded-full transition-colors {index === currentStep ? 'bg-primary' : index < currentStep ? 'bg-primary/50' : 'bg-gray-200'}"
-					onclick={() => goToStep(index)}
-					aria-label="Go to step {index + 1}"
-				></button>
-			{/each}
+		{#each children as child, index (child.linkId ?? index)}
+			<button
+				class="flex-1 h-2 rounded-full transition-colors {index === currentStep ? 'bg-primary' : index < currentStep ? 'bg-primary/50' : 'bg-gray-200'}"
+				onclick={() => goToStep(index)}
+				aria-label="Go to step {index + 1}: {child.text ?? ''}"
+			></button>
+		{/each}
 		</div>
 
 		{#if currentChild}

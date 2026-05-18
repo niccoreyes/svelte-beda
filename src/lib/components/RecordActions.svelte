@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
+
 	export interface RecordAction {
 		label: string;
 		href?: string;
@@ -10,9 +12,9 @@
 </script>
 
 <span class="flex gap-x-3">
-	{#each actions as action}
+	{#each actions as action, i (i)}
 		{#if action.href}
-			<a href={action.href} class="text-sm text-[var(--theme-primary)] hover:underline focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none rounded">{action.label}</a>
+			<a href={resolve(action.href)} class="text-sm text-[var(--theme-primary)] hover:underline focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none rounded">{action.label}</a>
 		{:else if action.onClick}
 			<button
 				type="button"

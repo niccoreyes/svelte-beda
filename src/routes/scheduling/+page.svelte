@@ -138,7 +138,7 @@
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-					{#each appointments as app}
+					{#each appointments as app (app.id)}
 						{@const patient = app.participant?.find((p) => p.actor?.reference?.startsWith('Patient/'))}
 						{@const practitioner = app.participant?.find((p) => p.actor?.reference?.startsWith('Practitioner/'))}
 						<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer" onclick={() => handleEventClick(app)}>
@@ -255,7 +255,7 @@
 				<div>
 					<span class="text-sm font-medium text-gray-500 dark:text-gray-400 block mb-1">Participants</span>
 					<ul class="space-y-1">
-						{#each selectedAppointment.participant || [] as participant}
+						{#each selectedAppointment.participant || [] as participant, i (participant.actor?.reference || i)}
 							<li class="text-sm text-gray-900 dark:text-white">
 								{participant.actor?.display || participant.actor?.reference || 'Unknown'}
 								<span class="text-gray-500 dark:text-gray-400">({participant.status})</span>

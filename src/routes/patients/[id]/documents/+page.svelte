@@ -150,7 +150,7 @@
 			<Empty message="No history found" />
 		{:else}
 			<div class="space-y-3 max-h-96 overflow-y-auto">
-				{#each entries as entry, idx}
+				{#each entries as entry, idx (idx)}
 					<div class="p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
 						<div class="flex items-center justify-between mb-1">
 							<span class="text-xs font-medium text-[var(--gray-7)]">Version {entries.length - idx}</span>

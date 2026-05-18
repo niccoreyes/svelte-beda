@@ -8,6 +8,7 @@ import VideoCallModal from '$lib/components/VideoCallModal.svelte';
 import HeaderActionButton from '$lib/components/HeaderActionButton.svelte';
 import CreateResourceModal from '$lib/components/CreateResourceModal.svelte';
 	import RecordActions from '$lib/components/RecordActions.svelte';
+	import type { Component } from 'svelte';
 	import BatchActionToolbar from '$lib/components/table/BatchActionToolbar.svelte';
 	import BatchActionConfirmModal from '$lib/components/table/BatchActionConfirmModal.svelte';
 	import { getCurrentUser } from '$lib/auth/user';
@@ -78,9 +79,7 @@ const encounterState = createServiceState<Bundle>(async () => {
 });
 
 $effect(() => {
-	filters;
-	columnFilterValues;
-	sortParam;
+	[filters, columnFilterValues, sortParam].forEach(() => {});
 	encounterState.reload();
 });
 
@@ -133,8 +132,9 @@ $effect(() => {
 		key: string;
 		header: string;
 		cell?: (row: unknown) => string;
-		component?: any;
-		componentProps?: (row: unknown) => Record<string, any>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		component?: Component<any, any, any>;
+		componentProps?: (row: unknown) => Record<string, unknown>;
 		filter?: { type: 'text' | 'select'; options?: Array<{ value: string; label: string }>; placeholder?: string };
 		sortable?: boolean;
 	}> = [

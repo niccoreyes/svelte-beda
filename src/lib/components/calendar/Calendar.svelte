@@ -75,18 +75,18 @@
 	</div>
 
 	<div class="weekdays">
-		{#each weekDays as wd}
+		{#each weekDays as wd, i (i)}
 			<div class="weekday">{wd}</div>
 		{/each}
 	</div>
 
 	<div class="days-grid">
-		{#each days() as { day, appointments: dayApps }}
+		{#each days() as { day, appointments: dayApps }, i (i)}
 			<div class="day-cell" class:empty={day === 0} class:today={isToday(day)}>
 				{#if day > 0}
 					<div class="day-number">{day}</div>
 					<div class="appointments">
-						{#each dayApps as app}
+						{#each dayApps as app (app.id)}
 							<div class="appointment-badge" title={getAppointmentTitle(app)}>
 								{getAppointmentTitle(app)}
 							</div>

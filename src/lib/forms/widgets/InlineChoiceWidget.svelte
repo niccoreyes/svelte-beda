@@ -23,11 +23,7 @@
 		return answer?.valueCoding?.code ? [answer.valueCoding.code] : [];
 	}
 
-	let selectedCodes = $state<string[]>([]);
-
-	$effect(() => {
-		selectedCodes = getSelectedCodes();
-	});
+	let selectedCodes = $state<string[]>(getSelectedCodes());
 
 	function handleToggle(code: string) {
 		if (isMulti) {
@@ -81,7 +77,7 @@
 		</div>
 	{:else}
 		<div class="flex flex-wrap gap-3">
-			{#each options as option}
+			{#each options as option (option.valueCoding?.code ?? option.valueString)}
 				{@const code = option.valueCoding?.code || ''}
 				{@const display = option.valueCoding?.display ?? option.valueCoding?.code ?? ''}
 				<label class="inline-flex items-center gap-1.5 text-sm cursor-pointer">

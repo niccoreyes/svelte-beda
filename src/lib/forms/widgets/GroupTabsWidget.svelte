@@ -29,7 +29,7 @@
 	{/if}
 	<div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800">
 		<div class="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
-			{#each tabs as tab}
+			{#each tabs as tab (tab.linkId)}
 				<button
 					type="button"
 					onclick={() => (activeTab = tab.linkId)}
@@ -40,7 +40,7 @@
 			{/each}
 		</div>
 		<div class="p-4">
-			{#each items as childItem}
+			{#each items as childItem (childItem.linkId)}
 				{#if childItem.linkId === activeTab}
 					{@render renderItem(childItem)}
 				{/if}

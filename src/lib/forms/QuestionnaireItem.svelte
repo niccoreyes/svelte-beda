@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { SvelteMap } from 'svelte/reactivity';
 	import type { QuestionnaireItem, QuestionnaireResponseItem, QuestionnaireResponseItemAnswer } from 'fhir/r4b';
 	import type { WidgetRegistry } from './widgetRegistry';
 	import { getWidget, getItemControl, defaultRegistry, mergeWidgetRegistry } from './widgetRegistry';
@@ -27,7 +28,7 @@
 		readonly = false,
 		validationErrors = [],
 		registry = {},
-		enabledMap = new Map(),
+		enabledMap = new SvelteMap(),
 		responseItems = []
 	}: Props = $props();
 

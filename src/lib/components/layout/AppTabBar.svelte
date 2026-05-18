@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	interface Props {
 		onMenuClick?: () => void;
 	}
@@ -7,7 +8,7 @@
 </script>
 
 <div class="tab-bar">
-	<a href="/" class="logo-link">
+	<a href={resolve('/')} class="logo-link">
 		<img src="/logo.svg" alt="Beda EMR" class="logo-img" />
 	</a>
 	<button

@@ -1,12 +1,13 @@
 <script lang="ts">
 	import ColumnFilterDropdown from './ColumnFilterDropdown.svelte';
+	import type { Component } from 'svelte';
 
 	interface ColumnConfig {
 		key: string;
 		header: string;
 		cell?: (row: unknown) => string;
-		component?: any;
-		componentProps?: (row: unknown) => Record<string, any>;
+		component?: Component;
+		componentProps?: (row: unknown) => Record<string, unknown>;
 		filter?: {
 			type: 'text' | 'select';
 			options?: Array<{ value: string; label: string }>;
@@ -102,7 +103,7 @@
 						/>
 					</th>
 				{/if}
-				{#each columns as col}
+				{#each columns as col (col.key)}
 					{@const isSortable = onSort && col.sortable !== false}
 					<th
 						class="px-6 py-3 {isSortable ? 'cursor-pointer select-none' : ''} {bordered ? 'border border-[var(--gray-4)]' : ''} {isSortable ? 'focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none' : ''}"
@@ -135,7 +136,7 @@
 			</tr>
 		</thead>
 		<tbody class="text-[var(--gray-10)]">
-			{#each paginatedData as row}
+			{#each paginatedData as row, i (getRowId ? getRowId(row) : i)}
 				{@const rowId = getRowId ? getRowId(row) : undefined}
 				{@const isSelected = rowId ? selectedIds.includes(rowId) : false}
 				<tr class="bg-[var(--gray-1)] dark:bg-[var(--gray-3)] {bordered ? '' : 'border-b border-[var(--gray-4)]'} hover:bg-[var(--gray-3)] dark:hover:bg-[var(--gray-6)] transition-colors">
@@ -149,14 +150,15 @@
 							/>
 						</td>
 					{/if}
-					{#each columns as col}
+					{#each columns as col (col.key)}
 								{@const CellComponent = col.component}
 								<td class="px-6 py-4 {bordered ? 'border border-[var(--gray-4)]' : ''}">
 									{#if CellComponent}
 										<CellComponent {...(col.componentProps?.(row) ?? {})} />
 									{:else if col.cell && col.cell(row).startsWith('<')}
 										<div class="[&_a]:text-[var(--theme-primary)] [&_a]:hover:underline">
-											{@html col.cell(row)}
+										<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+										{@html col.cell(row)}
 										</div>
 									{:else}
 										{col.cell?.(row) ?? ''}
@@ -170,7 +172,7 @@
 </div>
 {:else}
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-	{#each paginatedData as row}
+	{#each paginatedData as row, i (getRowId ? getRowId(row) : i)}
 		{@const rowId = getRowId ? getRowId(row) : undefined}
 		{@const isSelected = rowId ? selectedIds.includes(rowId) : false}
 		<div class="bg-[var(--gray-1)] dark:bg-[var(--gray-3)] rounded-lg border border-[var(--gray-4)] dark:border-[var(--gray-5)] p-4 hover:shadow-md transition-shadow">
@@ -184,17 +186,18 @@
 					/>
 				{/if}
 			</div>
-			{#each columns as col}
-							{@const CellComponent = col.component}
-							<div class="mb-2 last:mb-0">
-								<div class="text-xs text-[var(--gray-7)] uppercase tracking-wide">{col.header}</div>
-								<div class="text-sm text-[var(--gray-10)] font-medium">
-									{#if CellComponent}
-										<CellComponent {...(col.componentProps?.(row) ?? {})} />
-									{:else if col.cell && col.cell(row).startsWith('<')}
-										<div class="[&_a]:text-[var(--theme-primary)] [&_a]:hover:underline">
-											{@html col.cell(row)}
-										</div>
+			{#each columns as col (col.key)}
+						{@const CellComponent = col.component}
+						<div class="mb-2 last:mb-0">
+							<div class="text-xs text-[var(--gray-7)] uppercase tracking-wide">{col.header}</div>
+							<div class="text-sm text-[var(--gray-10)] font-medium">
+								{#if CellComponent}
+									<CellComponent {...(col.componentProps?.(row) ?? {})} />
+								{:else if col.cell && col.cell(row).startsWith('<')}
+									<div class="[&_a]:text-[var(--theme-primary)] [&_a]:hover:underline">
+										<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+										{@html col.cell(row)}
+									</div>
 									{:else}
 										{col.cell?.(row) ?? ''}
 									{/if}

@@ -143,7 +143,7 @@
 					{@const provenances = getProvenances()}
 					{#if versions.length > 0}
 						<div class="space-y-2 max-h-[60vh] overflow-y-auto">
-							{#each versions as version, i}
+							{#each versions as version, i (i)}
 								<div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
 									<div class="min-w-0">
 										<p class="font-medium text-sm">

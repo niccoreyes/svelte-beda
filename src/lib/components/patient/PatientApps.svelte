@@ -114,7 +114,7 @@
 							<a
 								href={documentUrl}
 								target="_blank"
-								rel="noopener noreferrer"
+								rel="external noopener noreferrer"
 								class="text-primary hover:underline break-all"
 							>
 								{documentUrl}

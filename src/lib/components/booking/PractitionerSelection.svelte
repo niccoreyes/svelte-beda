@@ -78,7 +78,7 @@
 			<Empty message="No practitioners found for this service" />
 		{:else}
 			<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-				{#each practitioners as practitioner}
+				{#each practitioners as practitioner (practitioner.id)}
 					<button
 						onclick={() => onSelect(practitioner)}
 						class="text-left p-4 rounded-lg border transition-colors {selected?.id === practitioner.id ? 'border-primary bg-primary/5 dark:bg-primary/10' : 'border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-primary hover:bg-gray-50 dark:hover:bg-gray-800'}"

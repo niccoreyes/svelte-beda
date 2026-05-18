@@ -44,18 +44,18 @@
 			</button>
 		</div>
 		<nav class="drawer-nav">
-			{#each menuItems as item}
-				<a
-					href={item.href}
-					class="drawer-item"
-					onclick={onClose}
-				>
-					<span class="item-icon">
-						<item.icon />
-					</span>
-					<span class="item-label">{item.label}</span>
-				</a>
-			{/each}
+		{#each menuItems as item (item.href)}
+			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve --><a
+				href={item.href}
+				class="drawer-item"
+				onclick={onClose}
+			>
+				<span class="item-icon">
+					<item.icon />
+				</span>
+				<span class="item-label">{item.label}</span>
+			</a>
+		{/each}
 		</nav>
 	</div>
 </div>

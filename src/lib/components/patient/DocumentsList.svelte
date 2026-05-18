@@ -8,6 +8,7 @@
 	import SearchBar from '$lib/components/SearchBar.svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import DocumentHistory from './DocumentHistory.svelte';
+	import { resolve } from '$app/paths';
 
 	interface Props {
 		patientId: string;
@@ -82,7 +83,6 @@
 	</div>
 
 	<RenderRemoteData remoteData={qrState.data}>
-		{#snippet children(data)}
 			{@const qrs = responses()}
 			{#if qrs.length > 0}
 				<div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
@@ -96,7 +96,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each qrs as qr}
+							{#each qrs as qr (qr.id)}
 								<tr
 									class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
 								>
@@ -117,7 +117,7 @@
 										<div class="flex items-center gap-2">
 											{#if qr.questionnaire}
 												<a
-													href={`/patients/${patientId}/documents/${getReferenceId(qr.questionnaire)}`}
+													href={resolve(`/patients/${patientId}/documents/${getReferenceId(qr.questionnaire)}`)}
 													class="text-sm text-primary hover:underline"
 												>
 													Fill
@@ -125,7 +125,7 @@
 											{/if}
 											{#if qr.id}
 												<a
-													href={`/patients/${patientId}/documents/${qr.id}/details`}
+													href={resolve(`/patients/${patientId}/documents/${qr.id}/details`)}
 													class="text-sm text-primary hover:underline"
 												>
 													View
@@ -147,7 +147,6 @@
 			{:else}
 				<Empty message="No documents found" />
 			{/if}
-		{/snippet}
 	</RenderRemoteData>
 </div>
 

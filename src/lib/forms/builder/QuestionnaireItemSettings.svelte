@@ -107,9 +107,9 @@
 				onchange={(e) => updateField('type', e.currentTarget.value as QuestionnaireItem['type'])}
 				class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white bg-white"
 			>
-				{#each itemTypes as t}
-					<option value={t.value}>{t.label}</option>
-				{/each}
+			{#each itemTypes as t (t.value)}
+				<option value={t.value}>{t.label}</option>
+			{/each}
 			</select>
 		</div>
 
@@ -173,7 +173,7 @@
 				</button>
 			</div>
 			<div class="space-y-2">
-				{#each enableWhenList as ew, idx}
+				{#each enableWhenList as ew, idx (idx)}
 					<div class="p-2 border border-gray-200 dark:border-gray-700 rounded bg-gray-50 dark:bg-gray-800">
 						<select
 							value={ew.question}
@@ -181,7 +181,7 @@
 							class="w-full mb-1 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white"
 						>
 							<option value="">-- Select question --</option>
-							{#each otherItems as oi}
+							{#each otherItems as oi (oi.linkId)}
 								<option value={oi.linkId}>{oi.text || oi.linkId}</option>
 							{/each}
 						</select>
@@ -190,7 +190,7 @@
 							onchange={(e) => updateEnableWhen(idx, { operator: e.currentTarget.value as typeof ew.operator })}
 							class="w-full mb-1 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white"
 						>
-							{#each operators as op}
+							{#each operators as op (op.value)}
 								<option value={op.value}>{op.label}</option>
 							{/each}
 						</select>

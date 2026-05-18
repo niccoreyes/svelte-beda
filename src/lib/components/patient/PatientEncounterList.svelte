@@ -6,6 +6,7 @@
 	import { Role } from '$lib/auth/role';
 	import { matchCurrentUserRole } from '$lib/auth/permissions';
 	import { getCurrentUser } from '$lib/auth/user';
+	import { resolve } from '$app/paths';
 	import RenderRemoteData from '$lib/components/RenderRemoteData.svelte';
 	import Empty from '$lib/components/Empty.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
@@ -69,7 +70,7 @@
 			class="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
 		>
 			<option value="">All Statuses</option>
-			{#each statusOptions as s}
+			{#each statusOptions as s (s)}
 				<option value={s}>{s}</option>
 			{/each}
 		</select>
@@ -90,7 +91,6 @@
 	</div>
 
 	<RenderRemoteData remoteData={encountersState.data}>
-		{#snippet children(data)}
 			{@const list = encounters()}
 			{#if list.length === 0}
 				<Empty message="No encounters found" />
@@ -117,14 +117,14 @@
 							</tr>
 						</thead>
 						<tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-							{#each list as encounter}
+							{#each list as encounter (encounter.id)}
 								{@const participant = encounter.participant?.[0]?.individual}
 								{@const typeText =
 									encounter.type?.[0]?.text || encounter.type?.[0]?.coding?.[0]?.display || '-'}
 								<tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
 									<td class="px-4 py-3">
 										<a
-											href={`/patients/${patientId}/encounters/${encounter.id}/`}
+											href={resolve(`/patients/${patientId}/encounters/${encounter.id}/`)}
 											class="text-primary hover:underline"
 										>
 											{encounter.period?.start
@@ -146,9 +146,9 @@
 														)}
 												class="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs"
 											>
-												{#each statusOptions as s}
-													<option value={s}>{s}</option>
-												{/each}
+										{#each statusOptions as s (s)}
+											<option value={s}>{s}</option>
+										{/each}
 											</select>
 										{:else}
 											<span
@@ -160,7 +160,7 @@
 									<td class="px-4 py-3 text-gray-700 dark:text-gray-300">{typeText}</td>
 									<td class="px-4 py-3">
 										<a
-											href={`/patients/${patientId}/encounters/${encounter.id}/`}
+											href={resolve(`/patients/${patientId}/encounters/${encounter.id}/`)}
 											class="text-xs text-primary hover:underline">Open →</a
 										>
 									</td>
@@ -170,7 +170,6 @@
 					</table>
 				</div>
 			{/if}
-		{/snippet}
 		{#snippet renderLoading()}
 			<Spinner />
 		{/snippet}

@@ -38,7 +38,7 @@
 			</div>
 			<table class="w-full text-sm font-mono">
 				<tbody>
-					{#each oldText.split('\n') as line}
+					{#each oldText.split('\n') as line, i (i)}
 						{@const isRemoved = deletions.includes(line)}
 						<tr class={isRemoved ? 'bg-red-50 dark:bg-red-900/20' : ''}>
 							<td class="px-3 py-1 w-6 select-none text-gray-400 border-r border-gray-100 dark:border-gray-700">
@@ -58,7 +58,7 @@
 			</div>
 			<table class="w-full text-sm font-mono">
 				<tbody>
-					{#each newText.split('\n') as line}
+					{#each newText.split('\n') as line, i (i)}
 						{@const isAdded = additions.includes(line)}
 						<tr class={isAdded ? 'bg-green-50 dark:bg-green-900/20' : ''}>
 							<td class="px-3 py-1 w-6 select-none text-gray-400 border-r border-gray-100 dark:border-gray-700">
@@ -77,7 +77,7 @@
 	<div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
 		<table class="w-full text-sm font-mono">
 			<tbody>
-				{#each inlineDiff() as item}
+				{#each inlineDiff() as item, i (i)}
 					<tr class={
 						item.type === 'removed'
 							? 'bg-red-50 dark:bg-red-900/20'

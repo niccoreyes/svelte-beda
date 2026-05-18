@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { SvelteURLSearchParams } from 'svelte/reactivity';
+
 	interface Props {
 		roomName: string;
 		userName: string;
@@ -9,7 +11,7 @@
 
 	function buildUrl(): string {
 		const base = `https://meet.jit.si/${encodeURIComponent(roomName)}`;
-		const params = new URLSearchParams();
+		const params = new SvelteURLSearchParams();
 		params.append('config.requireDisplayName', 'true');
 		params.append('config.startWithAudioMuted', 'false');
 		params.append('config.startWithVideoMuted', 'false');

@@ -51,7 +51,7 @@
 			<Empty message="No services found" />
 		{:else}
 			<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-				{#each services as service}
+				{#each services as service (service.id)}
 					<button
 						onclick={() => onSelect(service)}
 						class="text-left p-4 rounded-lg border transition-colors {selected?.id === service.id ? 'border-primary bg-primary/5 dark:bg-primary/10' : 'border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-primary hover:bg-gray-50 dark:hover:bg-gray-800'}"

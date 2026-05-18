@@ -8,6 +8,7 @@
 	} from '$lib/theme';
 	import { setLocale, getCurrentLocale } from '$lib/i18n';
 	import { browser } from '$app/environment';
+	import { resolve } from '$app/paths';
 	import {
 		PatientsIcon,
 		PractitionersIcon,
@@ -102,16 +103,16 @@
 >
 	<div class="sidebar-top">
 		<div class="logo-wrapper" class:collapsed>
-			<a href="/" class="logo-link">
+			<a href={resolve('/')} class="logo-link">
 				<img src="/logo.svg" alt="Beda EMR" class="logo-img" />
 			</a>
 		</div>
 
 		<nav class="nav-menu">
-			{#each menuItems as item}
-				{@const active = isActiveRoute(item.href)}
-				<a
-					href={item.href}
+		{#each menuItems as item (item.href)}
+			{@const active = isActiveRoute(item.href)}
+			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve --><a
+				href={item.href}
 					class="nav-item"
 					class:active
 					class:collapsed
@@ -212,7 +213,7 @@
 					onchange={(e) => handleSetLocale(e.currentTarget.value)}
 					class="locale-select"
 				>
-					{#each locales as locale}
+					{#each locales as locale (locale.code)}
 						<option value={locale.code}>{locale.label}</option>
 					{/each}
 				</select>

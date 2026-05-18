@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { DocumentReference } from 'fhir/r4b';
 	import { humanDate } from '$lib/utils';
+	import { resolve } from '$app/paths';
 
 	interface Props {
 		patientId: string;
@@ -44,7 +45,7 @@
 	{#if notes.length === 0}
 		<p class="text-sm text-gray-500 dark:text-gray-400">No notes available.</p>
 	{:else}
-		{#each notes as note}
+		{#each notes as note (note.id)}
 			<div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
 				<div class="flex items-start justify-between gap-2">
 					<h4 class="text-sm font-medium text-gray-900 dark:text-white">
@@ -65,7 +66,7 @@
 			</div>
 		{/each}
 		<div class="text-right">
-			<a href={`/patients/${patientId}/documents`} class="text-xs text-primary hover:underline">
+			<a href={resolve(`/patients/${patientId}/documents`)} class="text-xs text-primary hover:underline">
 				View all →
 			</a>
 		</div>

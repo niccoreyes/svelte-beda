@@ -36,7 +36,7 @@
 		<Empty message="No active medications" />
 	{:else}
 		<div class="space-y-2">
-			{#each medications() as med}
+			{#each medications() as med (med.id)}
 				<div class="p-2 bg-gray-50 dark:bg-gray-700 rounded">
 					<p class="text-sm font-medium text-gray-900 dark:text-white">
 						{med.medicationCodeableConcept?.text ||

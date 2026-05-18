@@ -51,7 +51,7 @@
 
 <div class="space-y-4">
 	<div class="flex gap-2 overflow-x-auto pb-2">
-		{#each days as day, i}
+		{#each days as day, i (i)}
 			<button
 				onclick={() => (selectedDayIndex = i)}
 				class="flex-shrink-0 px-4 py-2 rounded-lg border text-sm transition-colors {selectedDayIndex === i ? 'border-primary bg-primary/5 dark:bg-primary/10 text-primary font-medium' : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'}"
@@ -75,7 +75,7 @@
 		{@const dayData = slotsByDay()[selectedDayIndex]}
 		{#if dayData && dayData.slots.length > 0}
 			<div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-				{#each dayData.slots as slot}
+				{#each dayData.slots as slot (slot.start.getTime())}
 					<button
 						onclick={() => onSelect(slot)}
 						class="px-3 py-2 text-sm rounded-lg border transition-colors {selectedSlot && selectedSlot.start.getTime() === slot.start.getTime() ? 'border-primary bg-primary text-white' : 'border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-primary hover:bg-gray-50 dark:hover:bg-gray-800'}"

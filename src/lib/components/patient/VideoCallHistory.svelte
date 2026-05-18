@@ -32,13 +32,13 @@
 		<p class="text-sm text-[var(--gray-7)] italic">No video calls recorded.</p>
 	{:else}
 		<ul class="space-y-2">
-			{#each displayCalls as call}
+			{#each displayCalls as call (call.id)}
 				<li class="flex items-start justify-between rounded-md border border-[var(--gray-4)] bg-[var(--gray-1)] p-3">
 					<div class="space-y-1">
 						<p class="text-sm font-medium text-[var(--gray-10)]">{call.roomName}</p>
 						<p class="text-xs text-[var(--gray-7)]">{formatDate(call.date)} &middot; {call.duration}</p>
 						<div class="flex flex-wrap gap-1 pt-1">
-							{#each call.participants as p}
+							{#each call.participants as p, i (p + i)}
 								<span class="inline-flex items-center rounded-full bg-[var(--theme-primary)]/10 px-2 py-0.5 text-xs text-[var(--theme-primary)]">{p}</span>
 							{/each}
 						</div>

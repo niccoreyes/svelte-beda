@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	interface Props {
 		open?: boolean;
@@ -25,7 +26,8 @@
 	]);
 	let inputText = $state('');
 	let isRecording = $state(false);
-	let recognition: any = null;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let recognition: any | null = null;
 	let volumeLevel = $state(0);
 
 	const suggestedCommands = $derived([
@@ -45,6 +47,7 @@
 
 	function startRecording() {
 		if (typeof window === 'undefined') return;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 		if (!SpeechRecognitionAPI) {
 			addMessage('assistant', 'Speech recognition is not supported in your browser.');
@@ -61,7 +64,8 @@
 			volumeLevel = 1;
 		};
 
-		recognition.onresult = (event: SpeechRecognitionEvent) => {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		recognition.onresult = (event: any) => {
 			let transcript = '';
 			for (let i = event.resultIndex; i < event.results.length; i++) {
 				transcript += event.results[i]![0]!.transcript;
@@ -69,7 +73,8 @@
 			inputText = transcript;
 		};
 
-		recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		recognition.onerror = (event: any) => {
 			isRecording = false;
 			volumeLevel = 0;
 			console.error('Speech recognition error:', event.error);
@@ -99,16 +104,16 @@
 		const lower = command.toLowerCase();
 
 		if (lower.includes('patient summary') && patientId) {
-			goto(`/patients/${patientId}`);
+			goto(resolve(`/patients/${patientId}`));
 			addMessage('assistant', 'Navigating to patient summary...');
 		} else if (lower.includes('start encounter') && patientId) {
-			goto(`/patients/${patientId}/encounters`);
+			goto(resolve(`/patients/${patientId}/encounters`));
 			addMessage('assistant', 'Navigating to encounters to start a new one...');
 		} else if (lower.includes('add note') && encounterId) {
-			goto(`/patients/${patientId}/encounters/${encounterId}`);
+			goto(resolve(`/patients/${patientId}/encounters/${encounterId}`));
 			addMessage('assistant', 'Navigating to encounter workspace to add a note...');
 		} else if (lower.includes('allergies') && patientId) {
-			goto(`/patients/${patientId}`);
+			goto(resolve(`/patients/${patientId}`));
 			addMessage('assistant', 'Navigating to patient overview where allergies are shown...');
 		} else {
 			addMessage('assistant', `I understood "${command}". I'm a demo assistant with limited command support. Try: ${suggestedCommands.join(', ')}`);
@@ -170,7 +175,7 @@
 
 		<!-- Chat Area -->
 		<div class="flex-1 overflow-y-auto p-4 space-y-3">
-			{#each messages as msg}
+			{#each messages as msg (msg.timestamp)}
 				<div class="flex {msg.role === 'user' ? 'justify-end' : 'justify-start'}">
 					<div
 						class="max-w-[85%] rounded-lg px-3 py-2 text-sm {msg.role === 'user'
@@ -186,7 +191,7 @@
 		<!-- Suggested Commands -->
 		{#if suggestedCommands.length > 0}
 			<div class="px-3 pb-2 flex flex-wrap gap-1.5">
-				{#each suggestedCommands as cmd}
+				{#each suggestedCommands as cmd (cmd)}
 					<button
 						class="px-2 py-1 rounded-full text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
 						onclick={() => handleCommand(cmd)}
@@ -200,7 +205,7 @@
 		<!-- Voice Wave Animation -->
 		{#if isRecording}
 			<div class="flex items-center justify-center gap-1 px-4 py-2">
-				{#each [0.6, 0.8, 1, 0.8, 0.6] as baseHeight, i}
+				{#each [0.6, 0.8, 1, 0.8, 0.6] as baseHeight, i (i)}
 					<div
 						class="w-1.5 rounded-full bg-primary transition-all duration-150"
 						style="height: {Math.max(8, baseHeight * 40 * (0.5 + volumeLevel * 0.5 + Math.sin(Date.now() / 200 + i) * 0.3))}px;"

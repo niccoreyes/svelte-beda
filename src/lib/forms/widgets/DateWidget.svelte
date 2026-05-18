@@ -11,11 +11,7 @@
 
 	let { item, answer, onChange, readonly = false, error }: Props = $props();
 
-	let value = $state('');
-
-	$effect(() => {
-		value = answer?.valueDate ?? answer?.valueDateTime ?? '';
-	});
+	let value = $state(answer?.valueDate ?? answer?.valueDateTime ?? '');
 
 	function handleInput(event: Event) {
 		const target = event.target as HTMLInputElement;

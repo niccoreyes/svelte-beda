@@ -1,23 +1,26 @@
 <script lang="ts">
 	interface Props {
-		resource: any;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		resource: Record<string, any>;
 		resourceType: string;
-		onEdit: (resource: any) => void;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		onEdit: (resource: Record<string, any>) => void;
 	}
 
 	let { resource, resourceType, onEdit }: Props = $props();
 
 	const display = $derived(() => {
+		const r = resource;
 		const name =
-			(resource.name as Array<{ given?: string[]; family?: string; text?: string }>)?.[0]?.text ||
-			(resource.name as Array<{ given?: string[]; family?: string; text?: string }>)?.[0]?.family ||
-			(resource.title as string) ||
-			(resource.code?.text as string) ||
-			(resource.code?.coding?.[0]?.display as string) ||
-			(resource.identifier?.[0]?.value as string) ||
-			(resource.id as string) ||
+			(r.name as Array<{ given?: string[]; family?: string; text?: string }>)?.[0]?.text ||
+			(r.name as Array<{ given?: string[]; family?: string; text?: string }>)?.[0]?.family ||
+			(r.title as string) ||
+			(r.code?.text as string) ||
+			(r.code?.coding?.[0]?.display as string) ||
+			(r.identifier?.[0]?.value as string) ||
+			(r.id as string) ||
 			'Unknown';
-		return `${resourceType}/${resource.id || 'new'} — ${name}`;
+		return `${resourceType}/${r.id || 'new'} — ${name}`;
 	});
 </script>
 

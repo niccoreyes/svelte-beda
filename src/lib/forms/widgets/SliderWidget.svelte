@@ -11,14 +11,10 @@
 
 	let { item, answer, onChange, readonly = false, error }: Props = $props();
 
-	let value = $state(0);
+	let value = $state(answer?.valueInteger ?? answer?.valueDecimal ?? 0);
 	const min = $derived(item.extension?.find((e) => e.url?.includes('minValue'))?.valueInteger ?? 0);
 	const max = $derived(item.extension?.find((e) => e.url?.includes('maxValue'))?.valueInteger ?? 100);
 	const step = $derived(item.extension?.find((e) => e.url?.includes('sliderStep'))?.valueInteger ?? 1);
-
-	$effect(() => {
-		value = answer?.valueInteger ?? answer?.valueDecimal ?? 0;
-	});
 
 	function handleInput(event: Event) {
 		const target = event.target as HTMLInputElement;

@@ -11,6 +11,7 @@
 
 	let { cards, onReorder, children }: Props = $props();
 
+	// eslint-disable-next-line svelte/prefer-writable-derived
 	let visibleCards = $state<Array<DashboardCardConfig & { id: string }>>([]);
 
 	$effect(() => {

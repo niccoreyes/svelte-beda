@@ -93,7 +93,7 @@
 	<div class="space-y-4">
 		<!-- Step indicator -->
 		<div class="flex items-center gap-2 mb-4">
-			{#each steps as s, i}
+			{#each steps as s, i (s.id)}
 				<div class="flex items-center gap-2">
 					<div
 						class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium {step >= s.id ? 'bg-primary text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400'}"
@@ -112,15 +112,15 @@
 			<div class="space-y-3">
 				<p class="text-sm text-gray-600 dark:text-gray-300">Select the document type:</p>
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-					{#each docTypes as t}
-						<button
-							onclick={() => { docType = t.value; step = 2; }}
-							class="p-3 text-left border rounded-lg transition-colors {docType === t.value ? 'border-primary bg-primary/5' : 'border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'}"
-						>
-							<p class="font-medium">{t.label}</p>
-							<p class="text-xs text-gray-500">{t.system} · {t.value}</p>
-						</button>
-					{/each}
+				{#each docTypes as t (t.value)}
+					<button
+						onclick={() => { docType = t.value; step = 2; }}
+						class="p-3 text-left border rounded-lg transition-colors {docType === t.value ? 'border-primary bg-primary/5' : 'border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'}"
+					>
+						<p class="font-medium">{t.label}</p>
+						<p class="text-xs text-gray-500">{t.system} · {t.value}</p>
+					</button>
+				{/each}
 				</div>
 				<div class="flex justify-end mt-4">
 					<button

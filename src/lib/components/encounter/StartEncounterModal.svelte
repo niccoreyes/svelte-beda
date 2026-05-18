@@ -2,6 +2,7 @@
 	import { createFHIRResource } from '$lib/fhir';
 	import Modal from '$lib/components/Modal.svelte';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import type { Encounter } from 'fhir/r4b';
 
 	interface Props {
@@ -64,7 +65,7 @@
 
 			const result = await createFHIRResource(encounter);
 			if (result.id) {
-				goto(`/patients/${patientId}/encounters/${result.id}/`);
+				goto(resolve(`/patients/${patientId}/encounters/${result.id}/`));
 			}
 			onClose?.();
 		} catch (err) {
@@ -88,7 +89,7 @@
 				class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
 			>
 				<option value="">Select type...</option>
-				{#each encounterTypes as t}
+				{#each encounterTypes as t (t.code)}
 					<option value={t.code}>{t.display}</option>
 				{/each}
 			</select>

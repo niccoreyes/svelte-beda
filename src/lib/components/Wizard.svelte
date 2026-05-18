@@ -49,7 +49,7 @@
 			<div class="progress-fill" style="width: {progress}%"></div>
 		</div>
 		<div class="steps-indicator">
-			{#each steps as s, i}
+			{#each steps as s, i (i)}
 				<button
 					onclick={() => goTo(i)}
 					class="step-dot"

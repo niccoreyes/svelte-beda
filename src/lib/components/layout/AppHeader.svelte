@@ -49,10 +49,11 @@
 <header class="page-header">
 	<div class="header-inner">
 		<nav class="breadcrumbs">
-			{#each breadcrumbs as crumb, i}
+			{#each breadcrumbs as crumb, i (crumb.href)}
 				{#if i > 0}
 					<span class="separator">/</span>
 				{/if}
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 				<a href={crumb.href} class="crumb-link">{crumb.label}</a>
 			{/each}
 		</nav>

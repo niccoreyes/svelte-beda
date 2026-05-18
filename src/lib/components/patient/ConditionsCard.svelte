@@ -36,7 +36,7 @@
 		<Empty message="No active conditions" />
 	{:else}
 		<div class="space-y-2">
-			{#each conditions() as condition}
+			{#each conditions() as condition (condition.id)}
 				<div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
 					<span class="text-sm text-gray-900 dark:text-white"
 						>{condition.code?.text || condition.code?.coding?.[0]?.display || 'Unknown'}</span

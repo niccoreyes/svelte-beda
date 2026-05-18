@@ -39,7 +39,11 @@
 
 	function handleFinalize(e: CustomEvent<{ items: DragChild[] }>) {
 		dragChildren = e.detail.items;
-		childItems = e.detail.items.map(({ id, ...rest }) => rest as QuestionnaireItem);
+		childItems = e.detail.items.map((item) => {
+			const rest = { ...item };
+			delete (rest as Record<string, unknown>).id;
+			return rest as QuestionnaireItem;
+		});
 	}
 
 	function addChild(type: string) {
@@ -108,7 +112,7 @@
 			<div class="flex items-center justify-between mb-2">
 				<h4 class="text-sm font-medium text-gray-900 dark:text-white">Group Items</h4>
 				<div class="flex gap-1">
-					{#each childTypes as ct}
+					{#each childTypes as ct (ct)}
 						<button
 							onclick={() => addChild(ct)}
 							class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300"

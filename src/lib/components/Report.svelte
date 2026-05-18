@@ -47,13 +47,13 @@
 		</div>
 	</div>
 
-	{#each sections as section}
+	{#each sections as section, i (i)}
 		<div class="mb-6 last:mb-0">
 			<h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3 pb-2 border-b border-gray-100 dark:border-gray-700">
 				{section.title}
 			</h3>
 			<dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
-				{#each section.items as item}
+				{#each section.items as item (item.key)}
 					<div class="flex flex-col sm:flex-row sm:items-baseline py-1">
 						<dt class="text-sm font-medium text-gray-500 dark:text-gray-400 sm:w-1/3 shrink-0">{item.key}</dt>
 						<dd class="text-sm text-gray-800 dark:text-gray-200 sm:w-2/3">{item.value}</dd>

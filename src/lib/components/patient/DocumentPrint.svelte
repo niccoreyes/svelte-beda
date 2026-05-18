@@ -31,7 +31,7 @@
 
 		{#if document.content && document.content.length > 0}
 			<div class="space-y-4">
-				{#each document.content as content, i}
+				{#each document.content as content, i (i)}
 					<div class="border-t pt-4">
 						<p class="text-xs text-gray-500 mb-1">Attachment {i + 1}</p>
 						{#if content.attachment?.title}

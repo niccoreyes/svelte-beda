@@ -144,7 +144,7 @@
 				{@const notes = (bundle.entry?.map((e) => e.resource as DocumentReference).filter(Boolean) || []) as DocumentReference[]}
 				{#if notes.length > 0}
 					<div class="space-y-2 max-h-64 overflow-y-auto pr-1">
-						{#each notes as note}
+						{#each notes as note (note.id)}
 							<div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
 								<div class="flex items-center justify-between mb-1">
 									<p class="text-sm font-medium">{note.type?.text || 'Note'}</p>

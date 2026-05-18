@@ -11,16 +11,14 @@
 
 	let { item, answer, onChange, readonly = false, error }: Props = $props();
 
-	let transcribedText = $state('');
+	let transcribedText = $state(answer?.valueString ?? '');
 	let isRecording = $state(false);
-	let recognition: any = null;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let recognition: any | null = null;
 	let transcriptParts: string[] = [];
 
-	$effect(() => {
-		transcribedText = answer?.valueString ?? '';
-	});
-
 	function startRecording() {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const w = window as any;
 		if (!w.webkitSpeechRecognition && !w.SpeechRecognition) {
 			alert('Voice input is not supported in this browser.');
@@ -35,6 +33,7 @@
 		transcriptParts = transcribedText ? [transcribedText] : [];
 		isRecording = true;
 
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		recognition.onresult = (event: any) => {
 			let interim = '';
 			for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -121,7 +120,7 @@
 			</div>
 			{#if isRecording}
 				<div class="flex items-center gap-1">
-					{#each [1, 2, 3, 4] as i}
+					{#each [1, 2, 3, 4] as i (i)}
 						<div
 							class="w-1 bg-red-500 rounded-full animate-pulse"
 							style="height: {12 + Math.random() * 16}px; animation-delay: {i * 0.1}s"

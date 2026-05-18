@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { SvelteMap } from 'svelte/reactivity';
 	import type { QuestionnaireItem, QuestionnaireResponseItem, QuestionnaireResponseItemAnswer } from 'fhir/r4b';
 	import QuestionnaireItemComponent from './QuestionnaireItem.svelte';
 	import { evaluateEnableWhen } from './enableWhen';
@@ -18,7 +19,7 @@
 		onChange,
 		readonly = false,
 		validationErrors = [],
-		enabledMap = new Map(),
+		enabledMap = new SvelteMap(),
 		responseItems = []
 	}: Props = $props();
 
@@ -44,7 +45,7 @@
 		{/if}
 
 		<div class="flex gap-1 border-b mb-4">
-			{#each children as child, index}
+			{#each children as child, index (child.linkId ?? index)}
 				<button
 					type="button"
 					class="px-4 py-2 text-sm font-medium border-b-2 transition-colors {index === activeTabIndex ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}"

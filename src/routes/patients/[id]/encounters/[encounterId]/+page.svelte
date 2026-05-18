@@ -77,14 +77,14 @@
 		{#snippet headerContent()}
 			<EncounterHeader {encounter} {patient} {practitioner} />
 			<div class="flex space-x-1 border-b border-gray-200 dark:border-gray-700 mt-4">
-				{#each tabs as tab}
-					<button
-						class="px-4 py-2 text-sm font-medium border-b-2 transition-colors {activeTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}"
-						onclick={() => activeTab = tab.id}
-					>
-						{tab.label}
-					</button>
-				{/each}
+			{#each tabs as tab (tab.id)}
+				<button
+					class="px-4 py-2 text-sm font-medium border-b-2 transition-colors {activeTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}"
+					onclick={() => activeTab = tab.id}
+				>
+					{tab.label}
+				</button>
+			{/each}
 			</div>
 		{/snippet}
 
@@ -101,7 +101,7 @@
 					{@const observations = bundle.entry?.map((e) => e.resource as Observation).filter((r): r is Observation => !!r) || []}
 					{#if observations.length > 0}
 						<div class="relative pl-4 border-l-2 border-[var(--gray-4)] dark:border-[var(--gray-5)] space-y-4">
-							{#each observations as obs}
+							{#each observations as obs (obs.id)}
 								<div class="relative">
 									<div class="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-primary border-2 border-[var(--gray-1)] dark:border-[var(--gray-3)]"></div>
 									<div class="p-3 bg-[var(--gray-3)] dark:bg-[var(--gray-4)] rounded-lg">
@@ -133,7 +133,7 @@
 					{@const docs = bundle.entry?.map((e) => e.resource as DocumentReference).filter((r): r is DocumentReference => !!r) || []}
 					{#if docs.length > 0}
 						<div class="space-y-2">
-							{#each docs as doc}
+							{#each docs as doc (doc.id)}
 								<div class="p-3 bg-[var(--gray-3)] dark:bg-[var(--gray-4)] rounded-lg">
 									<p class="font-medium text-[var(--gray-10)]">{doc.type?.text || doc.type?.coding?.[0]?.display || 'Document'}</p>
 									<p class="text-sm text-[var(--gray-7)]">{doc.status} · {doc.date ? humanDateTime(doc.date) : '-'}</p>

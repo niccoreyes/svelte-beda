@@ -11,11 +11,7 @@
 
 	let { item, answer, onChange, readonly = false, error }: Props = $props();
 
-	let value = $state('');
-
-	$effect(() => {
-		value = answer?.valueInteger?.toString() ?? '';
-	});
+	let value = $state(answer?.valueInteger?.toString() ?? '');
 
 	function handleInput(event: Event) {
 		const target = event.target as HTMLInputElement;

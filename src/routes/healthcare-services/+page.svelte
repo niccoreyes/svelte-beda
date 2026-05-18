@@ -19,10 +19,10 @@ const serviceState = createServiceState<Bundle>(async () => {
 	return getFHIRResources<HealthcareService>('HealthcareService', params);
 });
 
-$effect(() => {
-	filters;
-	serviceState.reload();
-});
+	$effect(() => {
+		[filters].forEach(() => {});
+		serviceState.reload();
+	});
 
 	function getServiceName(hs: HealthcareService): string {
 		return hs.name || 'Unknown';

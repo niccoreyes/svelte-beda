@@ -112,14 +112,14 @@
 	<PageContainer title={getPractitionerName(practitioner)} variant="with-tabs">
 		{#snippet headerContent()}
 			<div class="flex space-x-1 border-b border-gray-200 dark:border-gray-700">
-				{#each tabs as tab}
-					<button
-						class="px-4 py-2 text-sm font-medium border-b-2 transition-colors {activeTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}"
-						onclick={() => activeTab = tab.id}
-					>
-						{tab.label}
-					</button>
-				{/each}
+			{#each tabs as tab (tab.id)}
+				<button
+					class="px-4 py-2 text-sm font-medium border-b-2 transition-colors {activeTab === tab.id ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}"
+					onclick={() => activeTab = tab.id}
+				>
+					{tab.label}
+				</button>
+			{/each}
 			</div>
 		{/snippet}
 
@@ -138,9 +138,9 @@
 				{#if practitioner.telecom && practitioner.telecom.length > 0}
 					<div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
 						<p class="text-sm text-gray-500 dark:text-gray-400">Contact</p>
-						{#each practitioner.telecom as telecom}
-							<p>{telecom.system}: {telecom.value}</p>
-						{/each}
+					{#each practitioner.telecom as telecom, i (i)}
+						<p>{telecom.system}: {telecom.value}</p>
+					{/each}
 					</div>
 				{/if}
 			</div>
@@ -165,9 +165,9 @@
 								class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-1.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
 								bind:value={newSlotDay}
 							>
-								{#each dayNames as name, i}
-									<option value={i}>{name}</option>
-								{/each}
+						{#each dayNames as name, i (i)}
+							<option value={i}>{name}</option>
+						{/each}
 							</select>
 						</div>
 						<div class="flex flex-col gap-1">
@@ -198,8 +198,8 @@
 
 					{#if availabilitySlots.length > 0}
 						<div class="mt-3 space-y-1.5">
-							{#each availabilitySlots as slot}
-								<div class="flex items-center justify-between p-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md">
+						{#each availabilitySlots as slot (slot.id)}
+							<div class="flex items-center justify-between p-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md">
 									<span class="text-sm text-gray-700 dark:text-gray-300">
 										{dayNames[slot.dayOfWeek]} · {slot.startTime} – {slot.endTime}
 									</span>

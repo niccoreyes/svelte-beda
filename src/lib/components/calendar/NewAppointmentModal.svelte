@@ -121,7 +121,7 @@
 				required
 			>
 				<option value="">Select patient</option>
-				{#each patients as patient}
+				{#each patients as patient (patient.id)}
 					{@const name = patient.name?.[0]
 						? `${patient.name[0].given?.join(' ') || ''} ${patient.name[0].family || ''}`.trim()
 						: patient.id}
@@ -139,7 +139,7 @@
 				required
 			>
 				<option value="">Select practitioner</option>
-				{#each practitioners as practitioner}
+				{#each practitioners as practitioner (practitioner.id)}
 					{@const name = practitioner.name?.[0]
 						? `${practitioner.name[0].given?.join(' ') || ''} ${practitioner.name[0].family || ''}`.trim()
 						: practitioner.id}
@@ -156,7 +156,7 @@
 				bind:value={selectedServiceId}
 			>
 				<option value="">Select service (optional)</option>
-				{#each services as service}
+				{#each services as service (service.id)}
 					<option value={service.id}>{service.name || service.id}</option>
 				{/each}
 			</select>

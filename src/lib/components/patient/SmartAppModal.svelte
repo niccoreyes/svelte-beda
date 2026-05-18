@@ -82,7 +82,7 @@
 			<a
 				href={launchUrl}
 				target="_blank"
-				rel="noopener noreferrer"
+				rel="external noopener noreferrer"
 				class="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:opacity-90 transition-opacity"
 			>
 				Open in New Tab

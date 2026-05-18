@@ -3,6 +3,7 @@
 	import { getFHIRResources } from '$lib/fhir';
 	import { createServiceState } from '$lib/state';
 	import type { Questionnaire, Bundle } from 'fhir/r4b';
+	import { resolve } from '$app/paths';
 
 	let searchQuery = $state('');
 
@@ -13,7 +14,7 @@
 	});
 
 	$effect(() => {
-		searchQuery;
+		[searchQuery].forEach(() => {});
 		questionnaireState.reload();
 	});
 
@@ -29,7 +30,7 @@
 <PageContainer title="Questionnaires" variant="with-table">
 	{#snippet titleRightElement()}
 		<a
-			href="/questionnaires/builder"
+			href={resolve("/questionnaires/builder")}
 			class="inline-flex items-center gap-1.5 rounded-md bg-[var(--theme-primary)] px-3 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
 		>
 			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,7 +69,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each questionnaires as q}
+						{#each questionnaires as q (q.id)}
 							<tr class="bg-[var(--gray-1)] border-b dark:bg-[var(--gray-3)] dark:border-[var(--gray-5)] hover:bg-[var(--gray-3)] dark:hover:bg-[var(--gray-6)] transition-colors">
 								<td class="px-6 py-4 font-medium text-[var(--gray-10)]">
 									{q.title || q.name || q.id || 'Unknown'}
@@ -78,8 +79,8 @@
 								</td>
 								<td class="px-6 py-4">
 									<div class="flex space-x-2">
-										<a href="/questionnaires/{q.id}" class="text-[var(--theme-primary)] hover:underline text-sm focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none rounded">View</a>
-										<a href="/questionnaires/{q.id}/edit" class="text-[var(--theme-primary)] hover:underline text-sm focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none rounded">Edit</a>
+										<a href={resolve(`/questionnaires/${q.id}`)} class="text-[var(--theme-primary)] hover:underline text-sm focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none rounded">View</a>
+										<a href={resolve(`/questionnaires/${q.id}/edit`)} class="text-[var(--theme-primary)] hover:underline text-sm focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none rounded">Edit</a>
 									</div>
 								</td>
 							</tr>

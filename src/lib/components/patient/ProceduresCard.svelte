@@ -36,7 +36,7 @@
 		<Empty message="No procedures recorded" />
 	{:else}
 		<div class="space-y-2">
-			{#each procedures() as proc}
+			{#each procedures() as proc (proc.id)}
 				<div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
 					<span class="text-sm text-gray-900 dark:text-white"
 						>{proc.code?.text || proc.code?.coding?.[0]?.display || 'Unknown'}</span

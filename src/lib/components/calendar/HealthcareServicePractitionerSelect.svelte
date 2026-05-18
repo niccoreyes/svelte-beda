@@ -115,7 +115,7 @@
 		onchange={handleChange}
 	>
 		<option value="">{placeholder}</option>
-		{#each comboOptions() as option}
+		{#each comboOptions() as option, i (i)}
 			<option value="{option.serviceId}||{option.practitionerId}">{option.label}</option>
 		{/each}
 	</select>

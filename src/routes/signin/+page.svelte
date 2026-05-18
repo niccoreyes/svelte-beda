@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { initiateLogin } from '$lib/auth';
 
 	let code = $state('');
@@ -12,7 +13,7 @@
 			code = codeParam;
 			import('$lib/auth/oauth').then(({ handleCallback }) => {
 				handleCallback(code)
-					.then(() => goto('/patients'))
+					.then(() => goto(resolve('/patients')))
 					.catch((err: Error) => { error = err.message; });
 			});
 		}
@@ -52,7 +53,7 @@
 				Or continue with public access (no login required for demo)
 			</p>
 			<button
-				onclick={() => goto('/patients')}
+				onclick={() => goto(resolve('/patients'))}
 				class="w-full mt-2 py-2.5 px-4 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors font-medium"
 			>
 				Continue as Guest

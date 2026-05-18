@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { SvelteSet } from 'svelte/reactivity';
 	import type { Observation, Bundle } from 'fhir/r4b';
 	import { getFHIRResources } from '$lib/fhir';
 	import { createServiceState } from '$lib/state';
@@ -61,7 +62,7 @@
 	}
 
 	function getAllDates(): string[] {
-		const dates = new Set<string>();
+		const dates = new SvelteSet<string>();
 		for (const type of observationTypes) {
 			const obs = getObservationsForType(type);
 			for (const o of obs) {
@@ -145,7 +146,7 @@
 							<th class="px-3 py-2 text-left font-semibold text-gray-700 dark:text-gray-300 sticky left-0 bg-gray-50 dark:bg-gray-800 z-10">
 								Observation
 							</th>
-							{#each allDates as date}
+							{#each allDates as date (date)}
 								<th class="px-3 py-2 text-center font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
 									{date}
 								</th>
@@ -157,7 +158,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each observationTypes as type}
+						{#each observationTypes as type (type.code)}
 							<FlowsheetRow observationType={type} observations={getObservationsForType(type)} />
 						{/each}
 					</tbody>
@@ -165,7 +166,7 @@
 			</div>
 
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-				{#each observationTypes as type}
+				{#each observationTypes as type (type.code)}
 					<AddObservationForm
 						{patientId}
 						observationType={type}
@@ -183,7 +184,7 @@
 						class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-2 py-1 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
 						bind:value={selectedChartType}
 					>
-						{#each observationTypes as type}
+						{#each observationTypes as type (type.code)}
 							<option value={type.code}>{type.display}</option>
 						{/each}
 					</select>

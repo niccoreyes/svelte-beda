@@ -11,12 +11,8 @@
 
 	let { item, answer, onChange, readonly = false, error }: Props = $props();
 
-	let selectedValue = $state('');
+	let selectedValue = $state(answer?.valueCoding?.code ?? '');
 	const options = $derived(item.answerOption ?? []);
-
-	$effect(() => {
-		selectedValue = answer?.valueCoding?.code ?? '';
-	});
 
 	function handleChange(event: Event) {
 		const target = event.target as HTMLSelectElement;
@@ -47,7 +43,7 @@
 			class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary {error ? 'border-red-500' : 'border-gray-300'}"
 		>
 			<option value="">-- Select --</option>
-			{#each options as option}
+			{#each options as option (option.valueCoding?.code ?? option.valueString)}
 				<option value={option.valueCoding?.code}>
 					{option.valueCoding?.display ?? option.valueCoding?.code}
 				</option>

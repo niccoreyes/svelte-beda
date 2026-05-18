@@ -119,8 +119,8 @@
 		{#if !bookingComplete}
 			<!-- Step indicator -->
 			<div class="flex items-center justify-center gap-2 mb-8">
-				{#each steps as s, i}
-					<div class="flex items-center gap-2">
+			{#each steps as s, i (s.id)}
+				<div class="flex items-center gap-2">
 						<button
 							onclick={() => goToStep(s.id)}
 							class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors {step >= s.id ? 'bg-primary text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}"

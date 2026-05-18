@@ -65,7 +65,7 @@
 			onchange={(e) => (selectedType = e.currentTarget.value)}
 			class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-700 dark:text-white"
 		>
-			{#each resourceTypes as rt}
+			{#each resourceTypes as rt (rt.value)}
 				<option value={rt.value}>{rt.label}</option>
 			{/each}
 		</select>

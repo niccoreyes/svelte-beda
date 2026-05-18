@@ -76,7 +76,7 @@
 		{@const appointments = bundle.entry?.map((e) => e.resource as Appointment).filter((r): r is Appointment => !!r) || []}
 		{#if appointments.length > 0}
 			<div class="space-y-2">
-				{#each appointments as app}
+				{#each appointments as app (app.id)}
 					<div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
 						<div class="flex-1 min-w-0">
 							<p class="text-sm font-medium text-gray-900 dark:text-white truncate">

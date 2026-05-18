@@ -22,7 +22,7 @@
 </script>
 
 <div class="space-y-3">
-	{#each apps as app}
+	{#each apps as app (app.url)}
 		<div class="flex items-start gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
 			<div class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
 				{#if app.icon}

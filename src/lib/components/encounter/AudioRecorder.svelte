@@ -31,7 +31,7 @@
 			timerInterval = setInterval(() => {
 				duration++;
 			}, 1000);
-		} catch (e) {
+		} catch {
 			error = 'Microphone access denied or unavailable';
 		}
 	}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
 	import { PageContainer, Spinner } from '$lib/components';
 	import { getFHIRResource } from '$lib/fhir';
@@ -37,7 +38,7 @@
 				<p class="text-lg font-medium">{q.status || '-'}</p>
 			</div>
 			<div class="flex space-x-2">
-				<a href="/questionnaires/{id}/edit" class="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:opacity-90 transition-opacity">
+				<a 				href={resolve(`/questionnaires/${id}/edit`)} class="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:opacity-90 transition-opacity">
 					Edit
 				</a>
 			</div>

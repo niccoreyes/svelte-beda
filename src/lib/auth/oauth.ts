@@ -1,4 +1,5 @@
-import { goto } from '$app/navigation';
+	import { goto } from '$app/navigation';
+import { resolve } from '$app/paths';
 import { setTokens, removeTokens } from './token';
 
 const AUTH_BASE_URL = import.meta.env.VITE_AUTH_URL || 'https://auth.fhirlab.net';
@@ -58,7 +59,7 @@ export async function handleCallback(code: string): Promise<void> {
 	const data = await response.json();
 	setTokens(data.access_token, data.refresh_token, data.expires_in);
 	localStorage.removeItem('beda_pkce_verifier');
-	goto('/patients');
+	goto(resolve('/patients'));
 }
 
 export async function refreshAccessToken(): Promise<string | null> {
@@ -88,5 +89,5 @@ export async function refreshAccessToken(): Promise<string | null> {
 
 export function logout(): void {
 	removeTokens();
-	goto('/signin');
+	goto(resolve('/signin'));
 }

@@ -100,8 +100,8 @@
 
 		{#if editMode}
 			<div class="config-panel">
-				{#each config.widgets as widget, i}
-					<div class="widget-config-row">
+					{#each config.widgets as widget, i (i)}
+						<div class="widget-config-row">
 						<input
 							type="text"
 							value={widget.title}
@@ -149,7 +149,7 @@
 		{/if}
 
 		<Dashboards {config}>
-			{#snippet widget(type, title)}
+			{#snippet widget(type)}
 				{@const data = widgetData[type]}
 				{@const loading = loadingWidgets[type]}
 				<div class="widget-content">
@@ -157,7 +157,7 @@
 						<Spinner />
 					{:else if data && data.entry && data.entry.length > 0}
 						<ul class="widget-list">
-							{#each data.entry.slice(0, 5) as entry}
+							{#each data.entry.slice(0, 5) as entry, _i (_i)}
 								{@const resource = entry.resource as Record<string, unknown> & { resourceType?: string; id?: string } | undefined}
 								{#if resource}
 									{@const nameList = resource.name as Array<{ text?: string }> | undefined}
@@ -166,7 +166,8 @@
 									{@const codeObj = resource.code as { text?: string } | undefined}
 									{@const codeText = codeObj?.text ? String(codeObj.text) : undefined}
 									<li class="widget-list-item">
-										<a href="/{(resource.resourceType || '').toLowerCase()}s/{resource.id}" class="widget-link">
+										<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+										<a href={`/{(resource.resourceType || '').toLowerCase()}s/${resource.id}`} class="widget-link">
 											<span class="widget-link-label">
 												{nameText || titleText || codeText || `${resource.resourceType || 'Resource'} ${resource.id || ''}`}
 											</span>

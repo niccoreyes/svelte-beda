@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	let newPassword = $state('');
 	let confirmPassword = $state('');
 	let error = $state<string | null>(null);
@@ -32,7 +33,7 @@
 
 		{#if success}
 			<div class="mb-4 p-3 bg-green-50 border border-green-200 rounded text-sm text-green-700">
-				Password reset successful. <a href="/signin" class="underline">Sign in</a>
+				Password reset successful. 			<a href={resolve('/signin')} class="underline">Sign in</a>
 			</div>
 		{:else}
 			<form onsubmit={handleSubmit} class="space-y-4">

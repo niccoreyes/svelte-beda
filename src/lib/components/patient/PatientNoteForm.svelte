@@ -131,7 +131,8 @@
 				class="w-full min-h-[120px] px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-sm prose dark:prose-invert max-w-none overflow-auto"
 			>
 				{#if content.trim()}
-					{@html simpleMarkdownToHtml(content)}
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html simpleMarkdownToHtml(content)}
 				{:else}
 					<span class="text-gray-400 dark:text-gray-500">Nothing to preview</span>
 				{/if}

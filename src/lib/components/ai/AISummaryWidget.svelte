@@ -57,7 +57,7 @@
 			<p class="text-sm text-[var(--gray-9)] leading-relaxed">{summaryState.data.summary}</p>
 			{#if summaryState.data.highlights.length > 0}
 				<div class="flex flex-wrap gap-2">
-					{#each summaryState.data.highlights as highlight}
+					{#each summaryState.data.highlights as highlight, i (i)}
 						<span class="inline-flex items-center rounded-full bg-[var(--theme-primary)]/10 px-2.5 py-0.5 text-xs font-medium text-[var(--theme-primary)]">
 							{highlight}
 						</span>

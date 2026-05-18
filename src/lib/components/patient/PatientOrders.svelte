@@ -32,7 +32,7 @@
 			{@const orders = (bundle.entry?.map((e) => e.resource as ServiceRequest).filter(Boolean) || []) as ServiceRequest[]}
 			{#if orders.length > 0}
 				<div class="space-y-2">
-					{#each orders as order}
+					{#each orders as order (order.id)}
 						<div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
 							<div>
 								<p class="font-medium">{order.code?.text || order.code?.coding?.[0]?.display || 'Service Request'}</p>

@@ -116,7 +116,7 @@
 			<thead>
 				<tr>
 					<th class="px-2 py-2 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky left-0 z-10"></th>
-					{#each weekDates as date, i}
+					{#each weekDates as date, i (i)}
 						<th class="px-2 py-2 text-center font-semibold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 {isSameDay(date, new Date()) ? 'bg-primary/10' : 'bg-gray-50 dark:bg-gray-800'}" style="min-width: 100px;">
 							<div>{weekDays[i]}</div>
 							<div class="text-gray-500">{format(date, 'MMM d')}</div>
@@ -125,12 +125,12 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each timeLabels as time}
+				{#each timeLabels as time (time)}
 					<tr class="border-b border-gray-100 dark:border-gray-800">
 						<td class="px-2 py-1.5 text-gray-500 dark:text-gray-400 font-medium sticky left-0 bg-white dark:bg-gray-900 z-10 border-r border-gray-100 dark:border-gray-800">
 							{time}
 						</td>
-						{#each Array.from({ length: 7 }, (_, i) => i) as dayIndex}
+						{#each Array.from({ length: 7 }, (_, i) => i) as dayIndex (dayIndex)}
 							{@const status = getSlotStatus(dayIndex, time)}
 							<td class="px-1 py-1">
 								<div

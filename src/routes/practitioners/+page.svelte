@@ -7,6 +7,7 @@
 	import HeaderActionButton from '$lib/components/HeaderActionButton.svelte';
 	import CreateResourceModal from '$lib/components/CreateResourceModal.svelte';
 	import RecordActions from '$lib/components/RecordActions.svelte';
+	import type { Component } from 'svelte';
 	import BatchActionConfirmModal from '$lib/components/table/BatchActionConfirmModal.svelte';
 	import { getCurrentUser } from '$lib/auth/user';
 	import { matchCurrentUserRole, Role } from '$lib/auth/permissions';
@@ -44,11 +45,10 @@ const practitionerState = createServiceState<Bundle>(async () => {
 	return getFHIRResources<Practitioner>('Practitioner', params);
 });
 
-$effect(() => {
-	filters;
-	sortParam;
-	practitionerState.reload();
-});
+	$effect(() => {
+		[filters, sortParam].forEach(() => {});
+		practitionerState.reload();
+	});
 
 	function getPractitionerName(p: Practitioner): string {
 		const name = p.name?.[0];
@@ -59,7 +59,7 @@ $effect(() => {
 	}
 
 	function getPractitionerSpecialty(p: Practitioner, bundle: Bundle): string {
-		const roles = bundle.entry?.map((e) => e.resource as PractitionerRole).filter((r): r is PractitionerRole => (r as any)?.resourceType === 'PractitionerRole');
+		const roles = bundle.entry?.map((e) => e.resource as PractitionerRole).filter((r): r is PractitionerRole => (r as unknown as Record<string, unknown>)?.resourceType === 'PractitionerRole');
 		const role = roles?.find((r) => r.practitioner?.reference?.includes(p.id || ''));
 		return role?.specialty?.map((s) => s.coding?.[0]?.display || s.text).filter(Boolean).join(', ') || '-';
 	}
@@ -99,8 +99,9 @@ $effect(() => {
 		key: string;
 		header: string;
 		cell?: (row: unknown) => string;
-		component?: any;
-		componentProps?: (row: unknown) => Record<string, any>;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		component?: Component<any, any, any>;
+		componentProps?: (row: unknown) => Record<string, unknown>;
 		filter?: { type: 'text' | 'select'; options?: Array<{ value: string; label: string }>; placeholder?: string };
 		sortable?: boolean;
 	}> = [

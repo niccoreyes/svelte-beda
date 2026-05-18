@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { page } from '$app/stores';
 	import { PageContainer, Spinner } from '$lib/components';
 	import { getFHIRResource } from '$lib/fhir';
@@ -87,7 +88,7 @@
 							Edit
 						</button>
 							<a
-								href={`/print-patient-document/${patientId}/${qr.id}`}
+								href={resolve(`/print-patient-document/${patientId}/${qr.id}`)}
 								class="px-3 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
 							>
 								Print
@@ -101,7 +102,7 @@
 							</button>
 						{/if}
 						<a
-							href={`/patients/${patientId}`}
+							href={resolve(`/patients/${patientId}`)}
 							class="px-3 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
 						>
 							Back

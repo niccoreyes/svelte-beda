@@ -24,7 +24,7 @@
 
 <div class="tabs">
 	<div class="tab-list" role="tablist">
-		{#each tabs as tab}
+		{#each tabs as tab (tab.id)}
 			<button
 				role="tab"
 				aria-selected={current === tab.id}

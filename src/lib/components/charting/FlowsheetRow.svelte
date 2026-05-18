@@ -60,7 +60,7 @@
 	<td class="px-3 py-2 text-sm font-medium text-gray-900 dark:text-white sticky left-0 bg-white dark:bg-gray-900 z-10">
 		{observationType.display}
 	</td>
-	{#each uniqueDates as date}
+	{#each uniqueDates as date (date)}
 		{@const obs = sortedObs.find((o) => getDateKey(o.effectiveDateTime || o.issued) === date)}
 		<td class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 text-center">
 			{obs ? getValueDisplay(obs) : '-'}

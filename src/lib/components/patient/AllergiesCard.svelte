@@ -35,7 +35,7 @@
 		<Empty message="No allergies recorded" />
 	{:else}
 		<div class="space-y-2">
-			{#each allergies() as allergy}
+			{#each allergies() as allergy (allergy.id)}
 				<div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
 					<span class="text-sm text-gray-900 dark:text-white"
 						>{allergy.code?.text || allergy.code?.coding?.[0]?.display || 'Unknown'}</span

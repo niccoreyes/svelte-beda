@@ -11,11 +11,7 @@
 
 	let { item, answer, onChange, readonly = false, error }: Props = $props();
 
-	let value = $state('');
-
-	$effect(() => {
-		value = answer?.valueString ?? '';
-	});
+	let value = $state(answer?.valueString ?? '');
 
 	function handleInput(event: Event) {
 		const target = event.target as HTMLTextAreaElement;

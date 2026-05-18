@@ -22,7 +22,7 @@ Object.defineProperty(globalThis, 'localStorage', {
 
 describe('token management', () => {
 	beforeEach(() => {
-		(globalThis as any).localStorage.clear();
+		(globalThis as unknown as { localStorage: Storage }).localStorage.clear();
 	});
 
 	it('stores and retrieves access token', () => {

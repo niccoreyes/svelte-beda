@@ -24,7 +24,7 @@
 </script>
 
 <div class="dashboards-grid">
-	{#each effectiveWidgets as widget, i}
+	{#each effectiveWidgets as widget, i (i)}
 		{#if config && widgetSnippet}
 			{@const cfg = config.widgets[i]}
 			{#if cfg}

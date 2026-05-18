@@ -205,7 +205,7 @@
 				class:dark:border-red-500={errors.gender}
 			>
 				<option value="">Select gender...</option>
-				{#each genderOptions as opt}
+				{#each genderOptions as opt (opt.value)}
 					<option value={opt.value}>{opt.label}</option>
 				{/each}
 			</select>
@@ -266,7 +266,7 @@
 				bind:value={telecomSystem}
 				class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
 			>
-				{#each telecomSystems as opt}
+				{#each telecomSystems as opt (opt.value)}
 					<option value={opt.value}>{opt.label}</option>
 				{/each}
 			</select>

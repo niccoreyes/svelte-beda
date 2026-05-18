@@ -11,11 +11,7 @@
 
 	let { item, answer, onChange, readonly = false, error }: Props = $props();
 
-	let checked = $state(false);
-
-	$effect(() => {
-		checked = answer?.valueBoolean ?? false;
-	});
+	let checked = $state(answer?.valueBoolean ?? false);
 
 	function handleChange(event: Event) {
 		const target = event.target as HTMLInputElement;

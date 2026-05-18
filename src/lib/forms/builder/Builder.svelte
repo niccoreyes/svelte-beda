@@ -23,6 +23,7 @@
 		}));
 	}
 
+	// eslint-disable-next-line svelte/prefer-writable-derived
 	let dragItems = $state<DragItem[]>([]);
 
 	$effect(() => {
@@ -35,7 +36,11 @@
 
 	function handleFinalize(e: CustomEvent<{ items: DragItem[] }>) {
 		dragItems = e.detail.items;
-		const newItems = e.detail.items.map(({ id, ...rest }) => rest as QuestionnaireItem);
+		const newItems = e.detail.items.map((item) => {
+			const rest = { ...item };
+			delete (rest as Record<string, unknown>).id;
+			return rest as QuestionnaireItem;
+		});
 		onUpdate(newItems);
 	}
 
@@ -98,7 +103,7 @@
 			Item Types
 		</h3>
 		<div class="space-y-1 overflow-y-auto flex-1">
-			{#each palette as p}
+			{#each palette as p (p.type)}
 				<button
 					onclick={() => addItem(p.type)}
 					class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-white dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-colors flex items-center gap-2"

@@ -10,6 +10,7 @@ vi.mock('@fullcalendar/core', () => ({
 		removeAllEventSources = vi.fn();
 		addEventSource = vi.fn();
 		getEvents = vi.fn(() => []);
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		constructor(_el: HTMLElement, _options: unknown) {}
 	}
 }));

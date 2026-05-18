@@ -71,7 +71,7 @@
 
 		<div class="examples">
 			<span class="examples-label">Try:</span>
-			{#each examples as ex}
+			{#each examples as ex (ex)}
 				<button onclick={() => applyExample(ex)} class="example-chip">{ex}</button>
 			{/each}
 		</div>
@@ -112,7 +112,7 @@
 					<Empty message="No resources found for this query" />
 				{:else}
 					<div class="results-list">
-						{#each entries as entry}
+						{#each entries as entry, i (i)}
 						{@const resource = entry.resource as Record<string, unknown> & { resourceType?: string; id?: string } | undefined}
 						{#if resource}
 							{@const nameList = resource.name as Array<{ text?: string }> | undefined}

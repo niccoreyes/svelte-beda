@@ -41,7 +41,7 @@
 		<Empty message="No upcoming appointments" />
 	{:else}
 		<div class="space-y-3">
-			{#each appointments() as appt}
+			{#each appointments() as appt (appt.id)}
 				<div class="flex flex-col gap-2 p-2 bg-gray-50 dark:bg-gray-700 rounded">
 					<div class="flex items-center justify-between">
 						<span class="text-sm font-medium text-gray-900 dark:text-white">

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 </script>
 
 <div class="flex flex-col items-center justify-center min-h-[60vh] p-8">
@@ -9,7 +10,7 @@
 		You don't have permission to access this page. Please contact your administrator if you believe this is an error.
 	</p>
 	<button
-		onclick={() => goto('/patients')}
+		onclick={() => goto(resolve('/patients'))}
 		class="px-4 py-2 bg-[var(--theme-primary)] text-white rounded-md hover:opacity-90 transition-opacity"
 	>
 		Go to Patients

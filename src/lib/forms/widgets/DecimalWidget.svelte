@@ -11,11 +11,7 @@
 
 	let { item, answer, onChange, readonly = false, error }: Props = $props();
 
-	let value = $state('');
-
-	$effect(() => {
-		value = answer?.valueDecimal?.toString() ?? '';
-	});
+	let value = $state(answer?.valueDecimal?.toString() ?? '');
 
 	function handleInput(event: Event) {
 		const target = event.target as HTMLInputElement;

@@ -23,7 +23,7 @@
 
 <Modal {open} title="Create New Document" onClose={onClose}>
 	<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-		{#each documentTypes as docType}
+		{#each documentTypes as docType (docType.type)}
 			<button
 				onclick={() => onSelect(docType.type)}
 				class="text-left p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors"

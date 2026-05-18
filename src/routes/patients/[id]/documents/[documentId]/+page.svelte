@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { PageContainer, Spinner } from '$lib/components';
 	import { getFHIRResource } from '$lib/fhir';
 	import { createServiceState } from '$lib/state';
@@ -27,9 +28,9 @@
 	function handleSaved(response: QuestionnaireResponse) {
 		const qrId = response.id;
 		if (qrId) {
-			goto(`/patients/${patientId}/documents/${qrId}/details`);
+			goto(resolve(`/patients/${patientId}/documents/${qrId}/details`));
 		} else {
-			goto(`/patients/${patientId}`);
+			goto(resolve(`/patients/${patientId}`));
 		}
 	}
 </script>

@@ -31,7 +31,7 @@
 		<p class="text-xs text-gray-400">No items yet</p>
 	{:else}
 		<div class="space-y-0.5">
-			{#each flatTree as { item, depth }}
+			{#each flatTree as { item, depth } (item.linkId)}
 				<button
 					onclick={() => onSelect(item.linkId)}
 					class="w-full text-left text-sm rounded px-2 py-1.5 transition-colors {selectedLinkId === item.linkId

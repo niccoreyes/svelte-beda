@@ -109,6 +109,7 @@ export async function forceDeleteFHIRResource<T extends FhirResource>(resource: 
 	});
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getFHIRResources<T extends FhirResource>(
 	resourceType: string,
 	searchParams: Record<string, string | string[] | number | undefined> = {}
@@ -202,7 +203,7 @@ export async function expandFHIRValueSet(url: string, filterText?: string): Prom
 	const params = new URLSearchParams({ url });
 	if (filterText) params.append('filter', filterText);
 	return fhirRequest<Bundle>({
-		url: `/ValueSet/\$expand?${params.toString()}`
+		url: `/ValueSet/$expand?${params.toString()}`
 	});
 }
 
@@ -213,7 +214,7 @@ export async function expandExternalTerminology(
 ): Promise<{ entry?: Array<{ resource?: unknown }> }> {
 	const params = new URLSearchParams({ url });
 	if (filterText) params.append('filter', filterText);
-	const response = await fetch(`${serverUrl}/ValueSet/\$expand?${params.toString()}`, {
+	const response = await fetch(`${serverUrl}/ValueSet/$expand?${params.toString()}`, {
 		headers: { Accept: 'application/fhir+json' }
 	});
 	if (!response.ok) throw new Error(`External terminology expansion failed: ${response.status}`);
@@ -240,7 +241,7 @@ export async function expandEMRValueSet(
 
 export async function generateUploadUrl(filename: string): Promise<{ filename: string; uploadUrl: string }> {
 	const response = await fhirRequest<{ filename: string; uploadUrl: string }>({
-		url: '/\$generate-upload-url',
+		url: '/$generate-upload-url',
 		method: 'POST',
 		body: { filename }
 	});
@@ -273,7 +274,7 @@ export function uploadFileWithXHR(
 
 export async function generateDownloadUrl(key: string): Promise<{ downloadUrl: string }> {
 	return fhirRequest<{ downloadUrl: string }>({
-		url: '/\$generate-download-url',
+		url: '/$generate-download-url',
 		method: 'POST',
 		body: { key }
 	});

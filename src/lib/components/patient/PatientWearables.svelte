@@ -53,7 +53,7 @@
 			{@const observations = (bundle.entry?.map((e) => e.resource as Observation).filter(Boolean) || []) as Observation[]}
 			{#if observations.length > 0}
 				<div class="space-y-2">
-					{#each observations as obs}
+					{#each observations as obs (obs.id)}
 						<div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
 							<div>
 								<p class="font-medium">{obs.code?.text || obs.code?.coding?.[0]?.display || 'Observation'}</p>

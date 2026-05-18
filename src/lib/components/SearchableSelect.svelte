@@ -81,7 +81,7 @@
 			{#if filteredOptions.length === 0}
 				<div class="p-3 text-sm text-gray-500 dark:text-gray-400 text-center">No results</div>
 			{:else}
-				{#each filteredOptions as option}
+				{#each filteredOptions as option (option.value)}
 					<button
 						type="button"
 						onclick={() => selectOption(option)}

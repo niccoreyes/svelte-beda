@@ -19,7 +19,7 @@
 
 	function findPatient(invoice: Invoice, bundle: Bundle): Patient | undefined {
 		const patientId = invoice.subject?.reference?.split('/')[1];
-		return bundle.entry?.find((e) => (e.resource as any)?.resourceType === 'Patient' && (e.resource as Patient).id === patientId)?.resource as Patient | undefined;
+		return bundle.entry?.find((e) => (e.resource as Record<string, unknown>)?.resourceType === 'Patient' && (e.resource as Patient).id === patientId)?.resource as Patient | undefined;
 	}
 
 	function findPractitioner(invoice: Invoice, bundle: Bundle): Practitioner | undefined {
@@ -27,12 +27,12 @@
 		if (!participantRef) return undefined;
 		const [type, id] = participantRef.split('/');
 		if (type === 'Practitioner') {
-			return bundle.entry?.find((e) => (e.resource as any)?.resourceType === 'Practitioner' && (e.resource as Practitioner).id === id)?.resource as Practitioner | undefined;
+			return bundle.entry?.find((e) => (e.resource as Record<string, unknown>)?.resourceType === 'Practitioner' && (e.resource as Practitioner).id === id)?.resource as Practitioner | undefined;
 		}
 		if (type === 'PractitionerRole') {
-			const role = bundle.entry?.find((e) => (e.resource as any)?.resourceType === 'PractitionerRole' && (e.resource as PractitionerRole).id === id)?.resource as PractitionerRole | undefined;
+			const role = bundle.entry?.find((e) => (e.resource as Record<string, unknown>)?.resourceType === 'PractitionerRole' && (e.resource as PractitionerRole).id === id)?.resource as PractitionerRole | undefined;
 			const pracId = role?.practitioner?.reference?.split('/')[1];
-			return bundle.entry?.find((e) => (e.resource as any)?.resourceType === 'Practitioner' && (e.resource as Practitioner).id === pracId)?.resource as Practitioner | undefined;
+			return bundle.entry?.find((e) => (e.resource as Record<string, unknown>)?.resourceType === 'Practitioner' && (e.resource as Practitioner).id === pracId)?.resource as Practitioner | undefined;
 		}
 		return undefined;
 	}

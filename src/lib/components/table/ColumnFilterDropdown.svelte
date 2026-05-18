@@ -43,7 +43,7 @@
 			class="w-full text-xs px-2 py-1 rounded border border-[var(--gray-4)] bg-[var(--gray-1)] dark:bg-[var(--gray-4)] text-[var(--gray-10)] dark:text-[var(--gray-10)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary)]"
 		>
 			<option value="">All</option>
-			{#each filter.options || [] as opt}
+			{#each filter.options || [] as opt (opt.value)}
 				<option value={opt.value}>{opt.label}</option>
 			{/each}
 		</select>
