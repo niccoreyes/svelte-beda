@@ -97,10 +97,8 @@ async function main() {
   ensureDir(SCREENSHOT_DIR);
   
   // Check if dev server is running
-  let serverRunning = false;
   try {
     sh(`curl -sf ${BASE_URL} > /dev/null`, { silent: true });
-    serverRunning = true;
     console.log('✅ Dev server already running');
   } catch {
     console.log('⚡ Starting dev server...');
